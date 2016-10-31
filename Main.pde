@@ -11,11 +11,7 @@ void setup() {
   game.start();
 }
 void draw() {
-  int s = millis();
   game.update(); 
-  fill(255);
-  textSize(16);
-  text(millis() - s, 30, 30);
 }
 void keyPressed() { 
   game.keyDown();
