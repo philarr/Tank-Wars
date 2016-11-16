@@ -4,6 +4,6 @@
 
 Top-down shooter made in Processing
 
-Working example @ http://www.sfu.ca/~pmchung/iat167/
+Working example @ http://www.sfu.ca/~pmchung/tank-wars/
 
 About Processing https://processing.org/
