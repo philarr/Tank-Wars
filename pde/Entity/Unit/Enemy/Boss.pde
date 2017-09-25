@@ -1,7 +1,7 @@
 //Boss class - Scripting
 
 class Boss extends Enemy {
-  HUD hud; //Reference variable to the hud instance
+  UI hud; //Reference variable to the hud instance
   boolean intro; //Say something when the level starts
   boolean phase1; //Set phase difficulty
   boolean phase2; // ^
@@ -16,7 +16,7 @@ class Boss extends Enemy {
   State state; //Reference variable to the current state
 
   //Class constructor
-  Boss(float x, float y, Camera obj, Player player, HUD hud, State s) { 
+  Boss(float x, float y, Camera obj, Player player, UI hud, State s) {
     super(x, y, obj, null, player);
     //Difficulty at start of battle
     this.intro = false;
@@ -45,7 +45,7 @@ class Boss extends Enemy {
   void isHit(Unit obj, int dmg) {
 
     this.health -= dmg;
-    
+
     //Shakes the boss if dead
     if (this.health <= 0 && timer[5] == 0) timer[5] = 100;
     this.timer[4] = 30;
@@ -66,9 +66,9 @@ class Boss extends Enemy {
         //Phase 3 - taunt when player try to cancel the shake
         if (phase3 && timer[5] > 0) {
           int randomSpeech = int(random(3));
-          if (randomSpeech == 0) hud.say1(new Dialogue(-2, "Boss", "I'm unstoppable!"));
-          if (randomSpeech == 1) hud.say1(new Dialogue(-2, "Boss", "Nothing can stop me!"));
-          if (randomSpeech == 2) hud.say1(new Dialogue(-2, "Boss", "You think that will stop me?!"));
+          if (randomSpeech == 0) hud.say1(new Dialogue(240, "Boss", "I'm unstoppable!", true));
+          if (randomSpeech == 1) hud.say1(new Dialogue(240, "Boss", "Nothing can stop me!", true));
+          if (randomSpeech == 2) hud.say1(new Dialogue(240, "Boss", "You think that will stop me?!", true));
         }
         else {
           //Reset boss to normal behaviour
@@ -81,7 +81,6 @@ class Boss extends Enemy {
     }
   }
 
-
   void update(ArrayList enemy) {
     super.update();
 
@@ -90,7 +89,7 @@ class Boss extends Enemy {
       enemy.remove(this);
       state.block = true;
     }
-    
+
     //Randomly reset cooldown to make it harder
     if (int(random(this.dblProc)) == 0) {
       timer[3] = 0; //Reset shooting cooldown
@@ -100,10 +99,10 @@ class Boss extends Enemy {
         ramCooldown = 0; //Resets ramming cooldown
       }
     }
-    
+
     //If intro speech has not been said yet
     if (!intro) {
-      hud.say1(new Dialogue(-2, "Boss", "You are no match for me!"));
+      hud.say1(new Dialogue(240, "Boss", "You are no match for me!", true));
       this.intro = true;
     }
 
@@ -138,7 +137,7 @@ class Boss extends Enemy {
     if (this.health < 1850) {
       //PHASE 1 - Shoots max charge projectiles
       if (!phase1) {
-        hud.say1(new Dialogue(-2, "Boss", "Looks like I need more fire power!"));
+        hud.say1(new Dialogue(240, "Boss", "Looks like I need more fire power!", true));
         timer[5] = 100;
         this.reload = 80;
         this.weapon = 4;
@@ -150,7 +149,7 @@ class Boss extends Enemy {
     if (this.health < 1450) {
       //PHASE 2 - Ram the player (goes through walls)
       if (!phase2) {
-        hud.say1(new Dialogue(-2, "Boss", "You can't hide from me!"));
+        hud.say1(new Dialogue(240, "Boss", "You can't hide from me!", true));
         this.ramCooldown = 0;
         phase2 = true;
       }
@@ -172,7 +171,7 @@ class Boss extends Enemy {
     if (this.health < 950) {
       //PHASE 3 - Spam projectiles at player, lower ram cooldown + lower shake time, higher chance of double shot and uncancellable ram
       if (!phase3) {
-        hud.say1(new Dialogue(-2, "Boss", "Die!"));
+        hud.say1(new Dialogue(240, "Boss", "Die!", true));
         phase3 = true;
         timer[5] = 50;
         this.reload = 55;
@@ -186,7 +185,7 @@ class Boss extends Enemy {
     if (this.health < 200) {
       //PHASE 4 - angrier version of phase 3
       if (!phase4) {
-        hud.say1(new Dialogue(-2, "Boss", "!!!!!"));
+        hud.say1(new Dialogue(240, "Boss", "!!!!!", true));
         timer[5] = 50;
         this.phase4 = true;
         this.reload = 20;
@@ -217,11 +216,10 @@ class Boss extends Enemy {
       pushMatrix();
       translate2(this.tpos.x, this.tpos.y);
       fill(167, 35, 12);
-      rect(wSize/-2, -hSize/1.3, wSize, 10);  
+      rect(wSize/-2, -hSize/1.3, wSize, 10);
       fill(34, 177, 76);
       if (this.health > 0 ) rect(wSize/-2, -hSize/1.3, wSize*(this.health/2000), 10);
       popMatrix();
     }
   }
 }
-

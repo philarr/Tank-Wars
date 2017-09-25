@@ -13,20 +13,20 @@ class Camera {
 
 
   Camera(float x, float y) {
-    this.pos = new PVector(x, y); 
+    this.pos = new PVector(x, y);
     this.vel = new PVector();
     this.acc = new PVector();
     this.mr = new PVector();
     this.stopAt = new PVector();
     this.queueItem = new ArrayList<Entity>();
-    panning = false;
+    this.panning = false;
   }
-  
+
   void setPlayer(Entity p) {
     this.player = p;
   }
- 
-  
+
+
   void move(float x, float y) {
     acc.add(new PVector(x, y));
   }
@@ -40,12 +40,12 @@ class Camera {
     this.focus = obj;
     vel.set(0, 0, 0);
   }
-  
-  
+
+
   void queue(Entity obj) {
     this.queueItem.add(obj);
   }
-  
+
 
   //Pan camera to Entity
   boolean goTo(Entity obj) {
@@ -55,7 +55,7 @@ class Camera {
     }
     focus = null;
     toFocus = obj;
-    PVector mid = new PVector(width/2, height/2); 
+    PVector mid = new PVector(width/2, height/2);
     PVector diff = PVector.sub(obj.tpos, mid);
     PVector diff2 = PVector.sub(pos, diff);
     stopAt.set(diff);
@@ -68,7 +68,7 @@ class Camera {
   //Centers onto object
   void centerOn(Entity obj) {
     setFocus(obj);
-    PVector mid = new PVector(width/2, height/2); 
+    PVector mid = new PVector(width/2, height/2);
     PVector diff = PVector.sub(mid, obj.tpos);
     obj.tpos.add(diff);
     pos.sub(diff);
@@ -80,7 +80,7 @@ class Camera {
   PVector getVel() {
     return vel;
   }
-  
+
   void focusPlayer() {
     centerOn(player);
   }
@@ -93,7 +93,9 @@ class Camera {
   }
 
   void update() {
+    // If no pan item is queued, focus on player
     if (!panning & queueItem.size() <= 0 && this.focus != player) goTo(player);
+    // Focus on pan items
     if(!panning && queueItem.size() > 0) goTo(queueItem.get(0));
     if (panning) {
       count++;
@@ -108,7 +110,7 @@ class Camera {
       }
     }
 
-    vel.add(acc); 
+    vel.add(acc);
     vel.mult(0.8);
     pos.add(vel);
     acc.set(0, 0, 0);

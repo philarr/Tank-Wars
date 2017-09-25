@@ -1,7 +1,6 @@
 //Map class that generates the blocks and non unit collision
 
 class Map {
-
   int tileW = 50;
   int tileH = 50;
   int fullWidth, fullHeight;
@@ -42,38 +41,32 @@ class Map {
     return false;
   }
 
-
-  Boss loadBoss(int[][] bosschart, HUD hud, Player player, State s) {
-
+  Boss loadBoss(int[][] bosschart, UI hud, Player player, State s) {
     Boss b = new Boss(bosschart[stage][0], bosschart[stage][1], camera, player, hud, s);
-
     return b;
   }
 
   ArrayList loadPortal(State state) {
-
     ArrayList<Portal> portals = new ArrayList<Portal>();
 
     if (stage > portal.length ) return portals;
     for (int i=0; i<portal[stage].length; i++) {
       portals.add(new Portal(portal[stage][i][0], portal[stage][i][1], this.camera, state));
-    }  
+    }
     return portals;
   }
 
 
   ArrayList loadCube() {
-
     ArrayList<Cube> cube = new ArrayList<Cube>();
     if (stage > cubes.length-1) return cube;
     for (int i=0; i<cubes[stage].length; i++) {
       cube.add(new Cube(cubes[stage][i][0], cubes[stage][i][1], this.camera));
-    }  
+    }
     return cube;
   }
 
   ArrayList loadEnemy(int[][][][] p, Player player) {
-
     ArrayList<Enemy> enemy = new ArrayList<Enemy>();
     if (stage > pathing.length-1) return enemy;
     int[][][] enemies = p[stage];
@@ -91,18 +84,14 @@ class Map {
     return enemy;
   }
 
-
-
-  ArrayList loadWidget(HUD hud) {
-
-    ArrayList<Widget> widget = new ArrayList<Widget>(); 
-    int cSearch; 
+  ArrayList loadWidget(UI hud) {
+    int cSearch;
+    int addCount = 1;
+    ArrayList<Widget> widget = new ArrayList<Widget>();
     ArrayList<Door> doors = new ArrayList<Door>();
-    ArrayList<Integer> done = new ArrayList<Integer>();  
-    boolean go = true; 
-    int addCount;
+    ArrayList<Integer> done = new ArrayList<Integer>();
 
-    while (go) {
+    while (addCount > 0) {
       addCount = 0;
       cSearch = 0;
       for (int i=0; i<level[stage].length; i++) {
@@ -133,7 +122,6 @@ class Map {
       done.add(cSearch);
       widget.addAll(doors);
       doors.clear();
-      if (addCount == 0) go = false;
     }
     return widget;
   }
@@ -183,14 +171,14 @@ class Map {
             translate(xPos+tileW - camera.pos.x, yPos - camera.pos.y  );
             fill(0, 0, 0, 127);
             noStroke();
-            rect(0, 0, 10, tileH); 
+            rect(0, 0, 10, tileH);
             popMatrix();
             if (level[l][i+1][u+1] <= 0 && level[l][i+1][u] <= 0 ) {
               pushMatrix();
               translate(xPos+tileW - camera.pos.x, yPos+tileH - camera.pos.y  );
               fill(0, 0, 0, 127);
               noStroke();
-              rect(0, 0, 10, 10); 
+              rect(0, 0, 10, 10);
               popMatrix();
             }
           }
@@ -199,7 +187,7 @@ class Map {
             translate(xPos - camera.pos.x, yPos+tileH - camera.pos.y  );
             fill(0, 0, 0, 127);
             noStroke();
-            rect(0, 0, tileW, 10); 
+            rect(0, 0, tileW, 10);
             popMatrix();
           }
         }

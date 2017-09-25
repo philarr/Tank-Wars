@@ -3,14 +3,70 @@
 	<head>
 	  <title>Tank Wars - HTML5 canvas game</title>
 		<style type="text/css">
-
 			body {
-				background: #2b363f;
+				background: #101010;
+			}
+			canvas {
+				outline: none;
+				margin: 2% auto;
+				display: block;
 			}
 		</style>
-		<script src="processing.js"></script>
 	</head>
 	<body>
- 		<canvas data-processing-sources="pde/Asset.pde pde/Boss.pde pde/Camera.pde pde/Entity.pde pde/Game.pde pde/HUD.pde pde/Level.pde pde/Main.pde pde/Map.pde pde/State.pde pde/Widget.pde"></canvas>
+		<script type="text/javascript">
+			var paths = [
+				'pde/interface/Socket.pde',
+
+				'pde/Input.pde',
+				'pde/Asset.pde',
+				'pde/Camera.pde',
+				'pde/Game.pde',
+				'pde/Network.pde',
+				'pde/Level.pde',
+				'pde/Main.pde',
+				'pde/Map.pde',
+
+				// States
+				'pde/State/State.pde',
+				'pde/State/Title.pde',
+				'pde/State/Gameover.pde',
+				'pde/State/Playing.pde',
+
+				// HUD
+				'pde/HUD/HUD.pde',
+				'pde/HUD/System.pde',
+				'pde/HUD/UI.pde',
+				'pde/HUD/Dialogue.pde',
+
+				// Entity
+				'pde/Entity/Entity.pde',
+				// Entity > Unit
+				'pde/Entity/Unit/Unit.pde',
+				'pde/Entity/Unit/Player.pde',
+				'pde/Entity/Unit/Projectile.pde',
+				'pde/Entity/Unit/Cube.pde',
+				'pde/Entity/Unit/Enemy/Enemy.pde',
+				'pde/Entity/Unit/Enemy/Boss.pde',
+				// Entity > Widget
+				'pde/Entity/Widget/Widget.pde',
+				'pde/Entity/Widget/Door.pde',
+				'pde/Entity/Widget/Portal.pde',
+				'pde/Entity/Widget/Trigger.pde'
+			];
+			var canvasEle = document.createElement('canvas');
+			canvasEle.setAttribute('data-processing-sources', paths.join(' '));
+			canvasEle.setAttribute('id', 'app');
+			document.body.appendChild(canvasEle);
+		</script>
+ 		<script src="processing.js"></script>
+ 		<script src="socket.io.js"></script>
+ 		<script type="text/javascript">
+ 			setTimeout(function() {
+	 			var instance = Processing.getInstanceById('app');
+	 			instance.addLibrary('socket', io);
+	 			canvasEle.focus();
+ 			}, 250);
+ 		</script>
 	</body>
 </html>

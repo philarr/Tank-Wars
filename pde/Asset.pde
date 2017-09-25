@@ -13,7 +13,7 @@ class Asset {
       "enemy.png", //3
       "enemy_turret.png", //4
       "Title1.png", //5
-      "Title2.png", //6 
+      "Title2.png", //6
       "Title_.png", //7
       "Tile/1.png", //8
       "trigger.png", //9
