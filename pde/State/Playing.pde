@@ -130,11 +130,11 @@ class Playing extends State {
       camera.update();
       hud.update();
       if (camera.focus != null) {
-        if (input.up) camera.focus.move(0, -1);
-        if (input.down) camera.focus.move(0, 1);
-        if (input.left) camera.focus.move(-1, 0);
-        if (input.right) camera.focus.move(1, 0);
-        if (input.space) player.charge();
+        if (input.STATE_UP) camera.focus.move(0, -1);
+        if (input.STATE_DOWN) camera.focus.move(0, 1);
+        if (input.STATE_LEFT) camera.focus.move(-1, 0);
+        if (input.STATE_RIGHT) camera.focus.move(1, 0);
+        if (input.STATE_ENTER) player.charge();
       }
     } else {
       //Paused screen
@@ -156,7 +156,7 @@ class Playing extends State {
       player.setWeapon(currentWeap);
     }
 
-    if (Input.isP()) {
+    if (Input.isEsc() || Input.isP()) {
       this.pause = !this.pause;
     }
   }

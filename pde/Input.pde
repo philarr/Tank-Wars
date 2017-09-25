@@ -1,12 +1,17 @@
 class Input {
   Network network;
 
-  Boolean up = false;
-  Boolean down = false;
-  Boolean left = false;
-  Boolean right = false;
-  Boolean space = false;
-  Boolean r = false;
+  Boolean STATE_UP = false;
+  Boolean STATE_DOWN = false;
+  Boolean STATE_LEFT = false;
+  Boolean STATE_RIGHT = false;
+  Boolean STATE_ENTER = false;
+  Boolean STATE_R = false;
+  Boolean STATE_P = false;
+
+  static Boolean isEsc() {
+    return key == 27 || keyCode == ESC;
+  }
 
   static Boolean isP() {
     return key == 112;
@@ -39,20 +44,20 @@ class Input {
   Input() { }
 
   void keyDown() {
-    if (Input.isUp()) this.up = true;
-    else if (Input.isDown()) this.down = true;
-    else if (Input.isLeft()) this.left = true;
-    else if (Input.isRight()) this.right = true;
-    else if (Input.isR()) this.r = true;
-    else if (Input.isEnter()) this.space = true;
+    if (Input.isUp()) STATE_UP = true;
+    else if (Input.isDown()) STATE_DOWN = true;
+    else if (Input.isLeft()) STATE_LEFT = true;
+    else if (Input.isRight()) STATE_RIGHT = true;
+    else if (Input.isR()) STATE_R = true;
+    else if (Input.isEnter()) STATE_ENTER = true;
   }
 
   void keyUp() {
-    if (Input.isUp()) this.up = false;
-    else if (Input.isDown()) this.down = false;
-    else if (Input.isLeft()) this.left = false;
-    else if (Input.isRight()) this.right = false;
-    else if (Input.isR()) this.r = false;
-    else if (Input.isEnter()) this.space = false;
+    if (Input.isUp()) STATE_UP = false;
+    else if (Input.isDown()) STATE_DOWN = false;
+    else if (Input.isLeft()) STATE_LEFT = false;
+    else if (Input.isRight()) STATE_RIGHT = false;
+    else if (Input.isR()) STATE_R = false;
+    else if (Input.isEnter()) STATE_ENTER = false;
   }
 }
