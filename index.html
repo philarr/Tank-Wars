@@ -17,6 +17,7 @@
 		<script type="text/javascript">
 			var paths = [
 				'pde/interface/Socket.pde',
+				'pde/Defintion/LevelDef.pde',
 
 				'pde/Input.pde',
 				'pde/Asset.pde',
@@ -61,10 +62,12 @@
 		</script>
  		<script src="processing.js"></script>
  		<script src="socket.io.js"></script>
+ 		<script src="quadtree.min.js"></script>
  		<script type="text/javascript">
  			setTimeout(function() {
 	 			var instance = Processing.getInstanceById('app');
 	 			instance.addLibrary('socket', io);
+	 			instance.addLibrary('Quadtree', Quadtree);
 	 			canvasEle.focus();
  			}, 250);
  		</script>

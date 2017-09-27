@@ -13,8 +13,11 @@ class Enemy extends Unit {
   boolean targetPlayer; //If it is currently targeting the player within its aggro radius
   Player player; //Reference variable to the player
 
+  final static int w = 50;
+  final static int h = 50;
+
   Enemy(float x, float y, Camera obj, ArrayList pathing, Player player) {
-    super(x, y, obj);
+    super(x, y, 50, 50, obj);
     if (pathing != null) {
       this.pathing = pathing;
     }
@@ -29,6 +32,7 @@ class Enemy extends Unit {
     this.reload = 100;
     this.targetPlayer = false;
     this.health = 100;
+    this.healthMax = 100;
     this.weapon = 2;
     this.dmg = 10;
     this.chargeTime = 1;
@@ -97,16 +101,16 @@ class Enemy extends Unit {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
     if (targetPlayer && this.health > 0) rotate(atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x));
-    image(asset.img.get(4), -(wSize*3)/15, -hSize/6);
+    image(asset.img.get(4), -(this.w*3)/15, -this.h/6);
     popMatrix();
 
     if (timer[4] > 0) {
       pushMatrix();
       translate2(this.tpos.x, this.tpos.y);
       fill(167, 35, 12);
-      rect(wSize/-2, -hSize/1.3, wSize, 10);
+      rect(this.w/-2, -this.h/1.3, this.w, 10);
       fill(34, 177, 76);
-      if (this.health > 0 ) rect(wSize/-2, -hSize/1.3, wSize*(this.health/100), 10);
+      if (this.health > 0 ) rect(this.w/-2, -this.h/1.3, this.w*(this.health/this.healthMax), 10);
       popMatrix();
     }
   }

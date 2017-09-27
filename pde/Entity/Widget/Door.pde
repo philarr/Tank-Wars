@@ -6,16 +6,15 @@ class Door extends Widget {
   Trigger t;
   int tileX;
   int tileY;
-  int stage;
+  int[][] level;
 
-  Door(float x, float y, Camera camera, HUD hud, int stage) {
-    super(x, y, camera);
-    tileX = int(x);
-    tileY = int(y);
-    this.t = t;
+  Door(float x, float y, Camera camera, HUD hud, int[][] level) {
+    super(x, y, 50, 50, camera);
+    this.tileX = int(x);
+    this.tileY = int(y);
     this.hud = hud;
     this.timer = 0;
-    this.stage = stage;
+    this.level = level;
     open = false;
   }
 
@@ -26,21 +25,20 @@ class Door extends Widget {
 
   void draw() {
     pushMatrix();
-    if (level[stage][tileY][tileX+1] == 1)  translate2(tpos.x + timer, tpos.y);
-    else if (level[stage][tileY][tileX-1] == 1) translate2(tpos.x - timer, tpos.y);
-    else if (level[stage][tileY+1][tileX] == 1)  translate2(tpos.x, tpos.y + timer);
-    else if (level[stage][tileY-1][tileX] == 1)  translate2(tpos.x, tpos.y - timer);
-
-    image(asset.img.get(8), -wSize/2, -hSize/2);
+    if (this.level[tileY][tileX+1] == 1)  translate2(this.tpos.x + this.timer, this.tpos.y);
+    else if (this.level[tileY][tileX-1] == 1) translate2(this.tpos.x - this.timer, this.tpos.y);
+    else if (this.level[tileY+1][tileX] == 1)  translate2(this.tpos.x, this.tpos.y + this.timer);
+    else if (this.level[tileY-1][tileX] == 1)  translate2(this.tpos.x, this.tpos.y - this.timer);
+    image(asset.img.get(8), -this.width/2, -this.height/2);
     popMatrix();
   }
   void unlock() {
     this.open = true;
-    level[stage][tileY][tileX] = 0;
+    this.level[tileY][tileX] = 0;
   }
   void lock() {
     this.open = false;
-    level[stage][tileY][tileX] = 2;
+    this.level[tileY][tileX] = 2;
   }
 
   void resolveCollision(boolean n) {

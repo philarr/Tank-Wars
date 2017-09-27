@@ -6,14 +6,18 @@ class Player extends Unit {
   int chargeTime; //The time you charged
   boolean dead;
 
+  static PImage ASSET_BASE;
+  static PImage ASSET_TURRET;
 
   Player(PVector spawn, Camera obj) {
-    super(spawn.x, spawn.y, obj);
+    super(spawn.x, spawn.y, 50, 50, obj);
     this.moveSpeed = 1;
     this.fade = 0;
     this.health = 500;
     this.reload = 20;
     this.chargeTime = 0;
+    ASSET_BASE = asset.img.get(1);
+    ASSET_TURRET = asset.img.get(2);
   }
 
   //Increase charge time (used from the key down event)
@@ -36,9 +40,29 @@ class Player extends Unit {
     return this.dead;
   }
 
+  void drawBase() {
+    pushMatrix();
+    translate2(this.tpos.x, this.tpos.y);
+    if (up) rotate(radians(0));
+    if (down) rotate(radians(180));
+    if (left) rotate(radians(-90));
+    if (right) rotate(radians(90));
+    image(ASSET_BASE, -25, -35);
+    popMatrix();
+  }
+
+  void drawTurret() {
+    pushMatrix();
+    translate2(this.tpos.x, this.tpos.y);
+    rotate(atan2(mouseY - this.tpos.y, mouseX - this.tpos.x));
+    image(ASSET_TURRET, -(this.width * 3) / 15, -this.height/6);
+    noTint();
+    popMatrix();
+  }
+
   void draw() {
-    if (this.health <= 0 && timer[5] == 0) dead = true;
-    if (dead) return;
+    this.dead = this.health <= 0 && timer[5] == 0;
+    if (this.dead) return;
 
     if (hitAnimate) {
       if (fade%10 == 0) tint(255, 255);
@@ -50,19 +74,7 @@ class Player extends Unit {
       hitAnimate = false;
     }
 
-    pushMatrix();
-    translate2(this.tpos.x, this.tpos.y);
-    if (up) rotate(radians(0));
-    if (down) rotate(radians(180));
-    if (left) rotate(radians(-90));
-    if (right) rotate(radians(90));
-    image(asset.img.get(1), -25, -35);
-    popMatrix();
-    pushMatrix();
-    translate2(this.tpos.x, this.tpos.y);
-    rotate(atan2(mouseY - this.tpos.y, mouseX - this.tpos.x));
-    image(asset.img.get(2), -(wSize*3)/15, -hSize/6);
-    noTint();
-    popMatrix();
+    drawBase();
+    drawTurret();
   }
 }

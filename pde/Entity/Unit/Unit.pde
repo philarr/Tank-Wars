@@ -6,10 +6,8 @@ class Unit extends Entity {
   int weapon; //The current weapon
   boolean up, down, left, right; //Which directin it is going
 
-  Unit(float x, float y, Camera obj) {
-    super(x*50, y*50, obj);
-    this.wSize = 50;
-    this.hSize = 50;
+  Unit(float x, float y, int w, int h, Camera obj) {
+    super(x*50, y*50, w, h, obj);
     this.vel = new PVector();
     this.tvel = new PVector();
     this.acc = new PVector();
@@ -92,6 +90,7 @@ class Unit extends Entity {
 
     x = x * moveSpeed;
     y = y * moveSpeed;
+
 
     // Move camera along with Unit if passes EDGE_OFFSET
     if (tpos.y <= EDGE_OFFSET && y < 0 ||

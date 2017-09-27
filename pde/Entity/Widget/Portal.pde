@@ -4,7 +4,7 @@ class Portal extends Widget {
   State state;
 
   Portal(float x, float y, Camera camera, State state) {
-    super(x, y, camera);
+    super(x, y, 50, 50, camera);
     this.state = state;
   }
 

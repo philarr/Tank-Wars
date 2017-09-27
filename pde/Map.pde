@@ -1,125 +1,189 @@
-//Map class that generates the blocks and non unit collision
-
+/*
+  Instances of a level, elements can be "destroyed"
+*/
 class Map {
-  int tileW = 50;
-  int tileH = 50;
-  int fullWidth, fullHeight;
-  int[][][] level;
-  int stage;
+  State container;
   Camera camera;
-  String tileFolder = "Asset/Tile/";
+  int [][] level;
+  int [][][] pathing;
+  int [][] cubes;
+  int [][] portal; // static
+  int [] boss;
+  Quadtree collision;
   ArrayList<PImage> img = new ArrayList<PImage>();
+ // Quadtree collisionMap = new Quadtree();
 
-  Map(int[][][] level, int w, int h, Camera obj, int stage) {
-    this.fullWidth = w;
-    this.fullHeight = h;
-    this.camera = obj;
-    this.level = level;
-    this.stage = stage;
+
+  ArrayList<Widget> widgetList = new ArrayList<Widget>();
+  ArrayList<Cube> cubeList = new ArrayList<Cube>();
+  ArrayList<Enemy> enemyList = new ArrayList<Enemy>();
+  ArrayList<Projectile> playerProjectileList = new ArrayList<Projectile>();
+  ArrayList<Projectile> enemyProjectileList = new ArrayList<Projectile>();
+
+
+  Map(State state) {
+    Object Quadtree = external.get('Quadtree');
+    if (!Quadtree) system.log('Missing tree class.');
+
+    this.tileW = Asset.tileW;
+    this.tileH = Asset.tileH;
+    this.tileFolder = Asset.tileFolder;
+
+    this.container = state;
+    this.camera = state.camera;
+
+    int stage = state.stage;
+
+    this.level = Level.level[stage];
+    this.pathing = Level.pathing[stage];
+    this.cubes = Level.cubes[stage];
+    this.portal = Level.portal[stage];
+    this.boss = Level.boss[stage];
+
+
+    this.collision = new Quadtree({
+      width: this.level.length * Asset.tileW,
+      height: this.level.length * Asset.tileH
+    });
+  }
+
+  void start() {
+    this.loadAsset();
+    this.loadWall();
+    this.cubeList.addAll(this.loadCube());
+    this.widgetList.addAll(this.loadWidget(this.container.hud));
+    this.widgetList.addAll(this.loadPortal(this.container));
+    this.enemyList.addAll(this.loadEnemy(this.container.player));
+    if (this.bossExist()) enemyList.add(this.loadBoss(this.container.hud, this.container.player, this.container));
+
+    console.log(this.collision.pretty());
+  }
+
+
+  boolean inScreen(Entity obj) {
+    return ((obj.tpos.x-obj.w/2)-camera.pos.x < __WIDTH__ && (obj.tpos.x+obj.w/2)-camera.pos.x > 0
+      &&  (obj.tpos.y-obj.h/2)-camera.pos.y < __HEIGHT__ && (obj.tpos.y+obj.h/2)-camera.pos.y > 0
+      ||  camera.ifFocus(obj));
   }
 
   int[][] getCollision() {
-    return level[this.stage];
+    return this.level;
   }
 
-  PVector getPlayerSpawn() {
-    PVector spawnXY = new PVector(0, 0);
-    for (int i=0; i<level[stage].length; i++) {
-      for (int u=0; u<level[stage][i].length; u++) {
-        if (level[stage][i][u] == -99) {
-          spawnXY.set(u, i, 0);
+  PVector getPlayerStart() {
+    PVector startXY = new PVector(0, 0);
+    for (int y = 0; y < this.level.length; y++) {
+      for (int x = 0; x < this.level[y].length; x++) {
+        if (this.level[y][x] == LevelDef.START) {
+          startXY.set(x, y, 0);
+          return startXY;
         }
       }
     }
-    return spawnXY;
+    return startXY;
   }
 
-  boolean bossExist(int[][] bosschart) {
-    if (bosschart[stage].length != 0) {
-      return true;
+  boolean bossExist() {
+    return !!this.boss && this.boss.length > 0;
+  }
+
+  Boss loadBoss(UI hud, Player player, State s) {
+    return new Boss(this.boss[0], this.boss[1], camera, player, hud, s);
+  }
+
+  ArrayList loadWall() {
+    ArrayList<Entity> walls = new ArrayList<Entity>();
+    for (int y = 0; y < this.level.length; y++) {
+      for (int x = 0; x < this.level[y].length; x++) {
+        if (this.level[y][x] == 1) {
+          Entity w = new Entity((x * 50) + 25, (y * 50) + 25, 50, 50)
+          walls.add(w);
+          this.collision.push(w.collision, true);
+        }
+      }
     }
-    return false;
+    return walls;
   }
 
-  Boss loadBoss(int[][] bosschart, UI hud, Player player, State s) {
-    Boss b = new Boss(bosschart[stage][0], bosschart[stage][1], camera, player, hud, s);
-    return b;
-  }
-
-  ArrayList loadPortal(State state) {
+  ArrayList loadPortal() {
     ArrayList<Portal> portals = new ArrayList<Portal>();
-
-    if (stage > portal.length ) return portals;
-    for (int i=0; i<portal[stage].length; i++) {
-      portals.add(new Portal(portal[stage][i][0], portal[stage][i][1], this.camera, state));
+    if (!this.portal || this.portal.length == 0) return portals;
+    for (int i = 0; i < this.portal.length; i++) {
+      Portal p = new Portal(this.portal[i][0], this.portal[i][1], this.camera, this.container);
+      portals.add(p);
+      this.collision.push(p.collision, true);
     }
     return portals;
   }
 
-
   ArrayList loadCube() {
     ArrayList<Cube> cube = new ArrayList<Cube>();
-    if (stage > cubes.length-1) return cube;
-    for (int i=0; i<cubes[stage].length; i++) {
-      cube.add(new Cube(cubes[stage][i][0], cubes[stage][i][1], this.camera));
+    if (!this.cubes || this.cubes.length == 0) return cube;
+    for (int i = 0; i < this.cubes.length; i++) {
+      Cube c = new Cube(this.cubes[i][0], this.cubes[i][1], this.camera)
+      cube.add(c);
+      this.collision.push(c.collision, true);
     }
     return cube;
   }
 
-  ArrayList loadEnemy(int[][][][] p, Player player) {
+  ArrayList loadEnemy(Player player) {
     ArrayList<Enemy> enemy = new ArrayList<Enemy>();
-    if (stage > pathing.length-1) return enemy;
-    int[][][] enemies = p[stage];
+    if (!this.pathing || this.pathing.length == 0) return enemy;
+    int[][] enemies = this.pathing;
 
-    for (int i=0; i<enemies.length; i++) {
+    for (int i = 0; i < enemies.length; i++) {
       ArrayList<int[]> enemypath = new ArrayList<int[]>();
-      for (int u=0; u<enemies[i].length; u++) {
+      for (int u = 0; u < enemies[i].length; u++) {
         int spawnX = enemies[i][0][0];
         int spawnY = enemies[i][0][1];
         enemypath.add(enemies[i][u]);
       }
-      enemy.add(new Enemy(enemies[i][0][0], enemies[i][0][1], camera, enemypath, player));
+      Enemy e = new Enemy(enemies[i][0][0], enemies[i][0][1], camera, enemypath, player);
+      enemy.add(e);
+      this.collision.push(e.collision, true);
     }
-
     return enemy;
   }
 
   ArrayList loadWidget(UI hud) {
-    int cSearch;
+    int doorSearch;
     int addCount = 1;
     ArrayList<Widget> widget = new ArrayList<Widget>();
     ArrayList<Door> doors = new ArrayList<Door>();
     ArrayList<Integer> done = new ArrayList<Integer>();
-
     while (addCount > 0) {
       addCount = 0;
-      cSearch = 0;
-      for (int i=0; i<level[stage].length; i++) {
-        for (int u=0; u<level[stage][i].length; u++) {
-          if (cSearch == 0 && level[stage][i][u] > 2 && level[stage][i][u] != -99) {
-            cSearch = level[stage][i][u];
-            for (int d=0; d<done.size(); d++) {
-              if (done.get(d) == cSearch) cSearch = 0;
+      doorSearch = 0;
+      for (int y = 0; y < this.level.length; y++) {
+        for (int x = 0; x < this.level[y].length; x++) {
+          if (doorSearch == 0 && this.level[y][x] > 2 && this.level[y][x] != LevelDef.START) {
+            doorSearch = this.level[y][x];
+            for (int d = 0; d < done.size(); d++) {
+              if (done.get(d) == doorSearch) doorSearch = 0;
             }
           }
-          if (cSearch == level[stage][i][u] && cSearch != 0) {
-            doors.add(new Door(u, i, camera, hud, stage));
+          if (doorSearch == this.level[y][x] && doorSearch != 0) {
+            Door d = new Door(x, y, camera, hud, this.level);
+            doors.add(d);
+            this.collision.push(d.collision, true);
             addCount += 1;
           }
         }
       }
-      if (cSearch != 0) {
-        int triggerNum = cSearch * -1;
-        for (int i=0; i<level[stage].length; i++) {
-          for (int u=0; u<level[stage][i].length; u++) {
-            if (level[stage][i][u] == triggerNum) {
-              widget.add(new Trigger(u, i, camera, doors, hud));
+      if (doorSearch != 0) {
+        int triggerId = LevelDef.getTrigger(doorSearch);
+        for (int y = 0; y < this.level.length; y++) {
+          for (int x = 0; x < this.level[y].length; x++) {
+            if (this.level[y][x] == triggerId) {
+              Trigger t = new Trigger(x, y, camera, doors, hud)
+              widget.add(t);
+              this.collision.push(t.collision, true);
             }
           }
         }
       }
-
-      done.add(cSearch);
+      done.add(doorSearch);
       widget.addAll(doors);
       doors.clear();
     }
@@ -132,66 +196,66 @@ class Map {
       "0.png"
     };
     for (int i=0; i<asset.length; i++) {
-      img.add(loadImage(tileFolder + asset[i]));
+      img.add(loadImage(this.tileFolder + asset[i]));
       //println("Loaded -> " + asset[i]);
     }
     return true;
   }
 
+  void drawWall(int x, int y) {
+    pushMatrix();
+    translate(x, y);
+    fill(255, 53, 62);
+    noStroke();
+    image(this.img.get(0), 0, 0);
+    popMatrix();
+  }
 
+  void drawShadow(int x, int y, int w, int h) {
+    pushMatrix();
+    translate(x, y);
+    fill(0, 0, 0, 127);
+    noStroke();
+    rect(0, 0, w, h);
+    popMatrix();
+  }
+
+  void update() {
+    console.log(this.collision.colliding(this.container.player));
+  }
 
   void draw() {
-    int l = this.stage;
     int xPos, yPos, cX, cY, oX, oY;
-    cX = abs(floor(camera.pos.x/tileW));
-    cY = abs(floor(camera.pos.y/tileH));
-    oX = abs(ceil((camera.pos.x+fullWidth)/tileW));
-    oY = abs(ceil((camera.pos.y+fullHeight)/tileH));
-    if (camera.pos.x < 0) cX = 0;
-    if (camera.pos.y < 0) cY = 0;
-    if (cY+oY > level[l].length) oY = level[l].length;
-    if (cX+oX > level[l][0].length) oX = level[l][0].length;
+    cX = abs(floor(this.camera.pos.x / this.tileW));
+    cY = abs(floor(this.camera.pos.y / this.tileH));
+    oX = abs(ceil((this.camera.pos.x + __WIDTH__) / this.tileW));
+    oY = abs(ceil((this.camera.pos.y + __HEIGHT__) / this.tileH));
+    if (this.camera.pos.x < 0) cX = 0;
+    if (this.camera.pos.y < 0) cY = 0;
+    if (cY+oY > this.level.length) oY = this.level.length;
+    if (cX+oX > this.level[0].length) oX = this.level[0].length;
 
     yPos = cY * 50;
-    for (int i=cY; i<oY; i++) {
+    for (int i = cY; i < oY; i++) {
       xPos = cX * 50;
-      for (int u=cX; u<oX; u++) {
-        if (level[l][i][u] == 1) {
-          pushMatrix();
-          translate(xPos - camera.pos.x, yPos - camera.pos.y  );
-          fill(255, 53, 62);
-          noStroke();
-          image(img.get(0), 0, 0);
-          popMatrix();
-        }
+      for (int u = cX; u < oX; u++) {
+        int drawX = xPos - this.camera.pos.x;
+        int drawY = yPos - this.camera.pos.y;
 
-        if (level[l][i][u] > 0) {
-          if (level[l][i][u+1] <= 0) {
-            pushMatrix();
-            translate(xPos+tileW - camera.pos.x, yPos - camera.pos.y  );
-            fill(0, 0, 0, 127);
-            noStroke();
-            rect(0, 0, 10, tileH);
-            popMatrix();
-            if (level[l][i+1][u+1] <= 0 && level[l][i+1][u] <= 0 ) {
-              pushMatrix();
-              translate(xPos+tileW - camera.pos.x, yPos+tileH - camera.pos.y  );
-              fill(0, 0, 0, 127);
-              noStroke();
-              rect(0, 0, 10, 10);
-              popMatrix();
+        if (this.level[i][u] == 1) {
+          this.drawWall(drawX, drawY);
+        }
+        if (this.level[i][u] > 0) {
+          if (this.level[i][u+1] <= 0) {
+            drawShadow(drawX + this.tileW, drawY, 10, this.tileH);
+            if (this.level[i+1][u+1] <= 0 && this.level[i+1][u] <= 0 ) {
+              drawShadow(drawX + this.tileW, drawY + this.tileH, 10, 10);
             }
           }
-          if (level[l][i+1][u] <= 0) {
-            pushMatrix();
-            translate(xPos - camera.pos.x, yPos+tileH - camera.pos.y  );
-            fill(0, 0, 0, 127);
-            noStroke();
-            rect(0, 0, tileW, 10);
-            popMatrix();
+          if (this.level[i+1][u] <= 0) {
+            drawShadow(drawX, drawY + this.tileH, this.tileW, 10);
           }
         }
-
         xPos += 50;
       }
       yPos += 50;

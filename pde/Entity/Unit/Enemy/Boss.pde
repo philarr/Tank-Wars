@@ -17,17 +17,16 @@ class Boss extends Enemy {
 
   //Class constructor
   Boss(float x, float y, Camera obj, Player player, UI hud, State s) {
-    super(x, y, obj, null, player);
+    super(x, y, 100, 100, obj, null, player);
     //Difficulty at start of battle
     this.intro = false;
     this.phase1 = false;
     this.phase2 = false;
     this.phase3 = false;
     this.phase4 = false;
-    this.wSize = 100;
-    this.hSize = 100;
     this.hud = hud;
     this.health = 2000;
+    this.healthMax = 2000;
     this.aggroRadius = 400;
     this.reload = 90;
     this.weapon = 2;
@@ -194,6 +193,16 @@ class Boss extends Enemy {
     }
   }
 
+  void drawHPBar() {
+    pushMatrix();
+    translate2(this.tpos.x, this.tpos.y);
+    fill(167, 35, 12);
+    rect(this.width/-2, -this.height/1.3, this.width, 10);
+    fill(34, 177, 76);
+    if (this.health > 0 ) rect(this.width/-2, -this.height/1.3, this.width*(this.health/this.healthMax), 10);
+    popMatrix();
+  }
+
   void draw() {
 
     if (phase3) tint(255, 100, 100, fade);
@@ -208,18 +217,12 @@ class Boss extends Enemy {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
     if (this.health > 0) rotate(atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x));
-    image(asset.img.get(15), -(wSize*2)/15, -hSize/4);
+    image(asset.img.get(15), -(this.width*2)/15, -this.height/4);
     noTint();
     popMatrix();
     //Shows the HP bar temporary when it has been hit
     if (timer[4] > 0) {
-      pushMatrix();
-      translate2(this.tpos.x, this.tpos.y);
-      fill(167, 35, 12);
-      rect(wSize/-2, -hSize/1.3, wSize, 10);
-      fill(34, 177, 76);
-      if (this.health > 0 ) rect(wSize/-2, -hSize/1.3, wSize*(this.health/2000), 10);
-      popMatrix();
+      drawHPBar();
     }
   }
 }

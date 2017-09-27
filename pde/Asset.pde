@@ -1,8 +1,10 @@
 //Asset - class to load the images needed for the game
 
 class Asset {
-
-  String imgFolder = "Asset/";
+  final static String imgFolder = "Asset/";
+  final static String tileFolder = "Asset/Tile/";
+  final static int tileW = 50;
+  final static int tileH = 50;
   ArrayList<PImage> img = new ArrayList<PImage>();
 
   Asset() {

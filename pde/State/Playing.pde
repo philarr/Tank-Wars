@@ -1,15 +1,15 @@
 class Playing extends State {
   Camera camera;
   Player player;
+  LevelSession level;
   Map map;
   int[][] mapc;
   UI hud;
-  ArrayList<Widget> widget = new ArrayList<Widget>();
-  ArrayList<Cube> cube = new ArrayList<Cube>();
-  ArrayList<Enemy> enemy = new ArrayList<Enemy>();
+  ArrayList<Widget> widget;
+  ArrayList<Cube> cube;
+  ArrayList<Enemy> enemy;
   ArrayList<Projectile> playerProjectile = new ArrayList<Projectile>();
   ArrayList<Projectile> enemyProjectile = new ArrayList<Projectile>();
-  ArrayList<Portal> portal;
   int stage;
   int currentWeap;
 
@@ -20,26 +20,25 @@ class Playing extends State {
 
   void start() {
     camera = new Camera(-350, -350);
-    map = new Map(level, width, height, this.camera, stage);
-    map.loadAsset();
+    map = new Map(this);
     mapc = map.getCollision();
-    player = new Player(map.getPlayerSpawn(), this.camera);
+    player = new Player(map.getPlayerStart(), this.camera);
     hud = new UI(camera, player);
     camera.setPlayer(player);
-    widget.addAll(map.loadWidget(hud));
-    enemy.addAll(map.loadEnemy(pathing, player));
 
-    if (map.bossExist(bosschart)) enemy.add(map.loadBoss(bosschart, hud, player, this));
+    this.widget = map.widgetList;
+    this.enemy = map.enemyList;
+    this.cube = map.cubeList;
 
-    cube.addAll(map.loadCube());
-    widget.addAll(map.loadPortal(this));
+    map.start();
+
   }
 
 
   //Checks if object is within screen region
   boolean inScreen(Entity obj) {
-    if ((obj.tpos.x-obj.wSize/2)-camera.pos.x < width && (obj.tpos.x+obj.wSize/2)-camera.pos.x > 0
-      &&  (obj.tpos.y-obj.hSize/2)-camera.pos.y < height && (obj.tpos.y+obj.hSize/2)-camera.pos.y > 0
+    if ((obj.tpos.x-obj.w/2)-camera.pos.x < width && (obj.tpos.x+obj.w/2)-camera.pos.x > 0
+      &&  (obj.tpos.y-obj.h/2)-camera.pos.y < height && (obj.tpos.y+obj.h/2)-camera.pos.y > 0
       ||  camera.ifFocus(obj)) return true;
     return false;
   }
@@ -53,6 +52,7 @@ class Playing extends State {
       if (inScreen(e)) e.aggroDraw();
     }
 
+    map.update();
     map.draw();
 
     //Widget to player and cube
@@ -145,7 +145,6 @@ class Playing extends State {
       if (player.health > 0) text("Paused", width/2, height/2);
       textAlign(LEFT);
     }
-
     //Player dead
     if (player.isDead() && !isPaused()) this.block = true;
   }
@@ -155,7 +154,6 @@ class Playing extends State {
       currentWeap = currentWeap == 0 ? 1 : 0;
       player.setWeapon(currentWeap);
     }
-
     if (Input.isEsc() || Input.isP()) {
       this.pause = !this.pause;
     }

@@ -3,10 +3,8 @@
 class Widget extends Entity {
   boolean on;
 
-  Widget(float x, float y, Camera camera) {
-    super((x*50)+25, (y*50)+25, camera);
-    this.wSize = 50;
-    this.hSize = 50;
+  Widget(float x, float y, int w, int h, Camera camera) {
+    super((x*50)+25, (y*50)+25, w, h, camera);
     this.on = false;
   }
   void resolveCollision(boolean n) {

@@ -2,13 +2,13 @@
 class Cube extends Unit {
 
   Cube(float x, float y, Camera camera) {
-    super(x, y, camera);
+    super(x, y, 50, 50, camera);
   }
 
   void draw() {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
-    image(asset.img.get(10), -wSize/2, -hSize/2, 50, 50);
+    image(asset.img.get(10), -this.width/2, -this.height/2, 50, 50);
     popMatrix();
   }
 

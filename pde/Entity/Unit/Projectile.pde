@@ -6,11 +6,11 @@ class Projectile extends Unit {
   Unit owner; //Who shot this projectile
 
   Projectile(int dmg, int charge, int type, Unit owner, PVector mouse, Camera camera) {
-    super(owner.pos.x/50, owner.pos.y/50, camera);
     float size = 10*(0.03*charge);
     if (size < 10) size = 10;
-    this.wSize = size;
-    this.hSize = size;
+    super(owner.pos.x/50, owner.pos.y/50, size, size, camera);
+    this.w = size;
+    this.h = size;
     this.dmg = dmg;
     this.charge = charge;
     this.type = type;
@@ -20,7 +20,7 @@ class Projectile extends Unit {
     mouse.sub(owner.tpos);
     dir.set(mouse);
     dir.normalize();
-    this.tpos.add(dir.x*(15+(owner.wSize/2)), dir.y*(15+(owner.hSize)), 0);
+    this.tpos.add(dir.x*(15+(owner.w/2)), dir.y*(15+(owner.h)), 0);
     dir.mult(this.moveSpeed);
     this.tvel.set(dir);
 
@@ -38,7 +38,7 @@ class Projectile extends Unit {
       strokeWeight(4);
       stroke(255, 255, 255, 170);
     }
-    ellipse(0, 0, this.wSize, this.hSize);
+    ellipse(0, 0, this.w, this.h);
     noStroke();
     popMatrix();
   }
