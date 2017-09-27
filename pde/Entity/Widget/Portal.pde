@@ -21,9 +21,10 @@ class Portal extends Widget {
     if (n && !this.on) {
       this.on = true;
       state.block = true;
+      system.log('Leaving level ' + state.stage);
     }
-    //Player moves out of tile..
 
+    //Player moves out of tile..
     if (!n && this.on) {
       this.on = false;
     }

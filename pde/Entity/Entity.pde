@@ -38,10 +38,8 @@ class Entity {
 
   //If any timers are > 0, begin counting down
   void update() {
-    for (int i=0; i<timer.length; i++) {
-      if (timer[i] > 0) timer[i] -= 1;
-    }
     updateCollision();
+    updateTimers();
   }
 
   void updateCollision() {
@@ -52,14 +50,20 @@ class Entity {
     if (y != self.y) self.y = y;
   }
 
+  void updateTimers() {
+    for (int i = 0; i < timer.length; i++) {
+      if (timer[i] > 0) timer[i] -= 1;
+    }
+  }
+
   //This translate version takes into account of the camera's focus and whether or not it needed the offset added
   void translate2(float x, float y) {
-    if (camera.ifFocus(this)) {
+    if (camera.isFocus(this)) {
       translate(x, y);
     }
     else {
-      PVector cp = camera.getPos();
-      translate(x - cp.x, y - cp.y);
+      PVector cameraPos = camera.getPos();
+      translate(x - cameraPos.x, y - cameraPos.y);
     }
   }
 

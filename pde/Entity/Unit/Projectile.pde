@@ -45,7 +45,7 @@ class Projectile extends Unit {
 
   //Overridden update because it moves differently from regular units
   void update() {
-    if (camera.ifFocus(this)) {
+    if (camera.isFocus(this)) {
       this.pos.set(PVector.add(this.tpos, camera.pos));
       this.vel.set(PVector.add(this.tvel, camera.vel));
     }

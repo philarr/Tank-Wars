@@ -19,14 +19,14 @@ class Playing extends State {
   }
 
   void start() {
-    camera = new Camera(-350, -350);
-    map = new Map(this);
-    mapc = map.getCollision();
-    player = new Player(map.getPlayerStart(), this.camera);
-    hud = new UI(camera, player);
-    camera.setPlayer(player);
+    this.camera = new Camera(-350, -350);
+    this.map = new Map(this);
+    this.mapc = map.getCollision();
+    this.player = new Player(this.map.getPlayerStart(), this.camera);
+    this.hud = new UI(this.camera, this.player);
+    this.camera.setPlayer(this.player);
 
-    map.start();
+    this.map.start();
     this.widget = map.widgetList;
     this.enemy = map.enemyList;
     this.cube = map.cubeList;
@@ -36,7 +36,7 @@ class Playing extends State {
   boolean inScreen(Entity obj) {
     if ((obj.tpos.x-obj.w/2)-camera.pos.x < width && (obj.tpos.x+obj.w/2)-camera.pos.x > 0
       &&  (obj.tpos.y-obj.h/2)-camera.pos.y < height && (obj.tpos.y+obj.h/2)-camera.pos.y > 0
-      ||  camera.ifFocus(obj)) return true;
+      ||  camera.isFocus(obj)) return true;
     return false;
   }
 
@@ -49,8 +49,8 @@ class Playing extends State {
       if (inScreen(e)) e.aggroDraw();
     }
 
-    map.update();
-    map.draw();
+    this.map.update();
+    this.map.draw();
 
     //Widget to player and cube
     for (int h=0; h<widget.size(); h++) {

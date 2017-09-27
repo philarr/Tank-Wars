@@ -23,7 +23,7 @@ class Cube extends Unit {
     }
     else {
       if (obj.timer[0] == 0) {
-        if (camera.ifFocus(obj)) {
+        if (camera.isFocus(obj)) {
           obj.tvel.add(camera.getVel());
           camera.pos.sub(camera.vel);
           camera.vel.mult(-1);

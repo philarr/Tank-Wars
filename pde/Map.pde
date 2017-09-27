@@ -63,7 +63,7 @@ class Map {
   boolean inScreen(Entity obj) {
     return ((obj.tpos.x-obj.w/2)-camera.pos.x < __WIDTH__ && (obj.tpos.x+obj.w/2)-camera.pos.x > 0
       &&  (obj.tpos.y-obj.h/2)-camera.pos.y < __HEIGHT__ && (obj.tpos.y+obj.h/2)-camera.pos.y > 0
-      ||  camera.ifFocus(obj));
+      ||  camera.isFocus(obj));
   }
 
   int[][] getCollision() {

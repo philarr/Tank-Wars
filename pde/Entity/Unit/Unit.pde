@@ -20,7 +20,7 @@ class Unit extends Entity {
     super.update();
 
     //If this Unit is the camera's focused, add its temporary position and camera's offset to get
-    if (camera.ifFocus(this)) {
+    if (camera.isFocus(this)) {
       this.pos.set(PVector.add(this.tpos, camera.pos));
       this.vel.set(PVector.add(this.tvel, camera.vel));
     }
@@ -42,7 +42,7 @@ class Unit extends Entity {
 
   void resolveBlock() {
     if (timer[1] > 0) return;
-    if (camera.ifFocus(this)) {
+    if (camera.isFocus(this)) {
       tvel.add(camera.getVel());
       camera.pos.sub(camera.vel);
       camera.vel.mult(-1);
@@ -77,10 +77,8 @@ class Unit extends Entity {
     timer[3] = reload;
   }
 
-
   //Move if not bouncing back from collision and not shaking
   void move(float x, float y) {
-    int EDGE_OFFSET = 150;
     if (timer[0] > 0 || timer[1] > 0 || timer[2] > 0 || timer[5] > 0) return;
 
     up = y > 0;
@@ -91,12 +89,11 @@ class Unit extends Entity {
     x = x * moveSpeed;
     y = y * moveSpeed;
 
-
     // Move camera along with Unit if passes EDGE_OFFSET
-    if (tpos.y <= EDGE_OFFSET && y < 0 ||
-      tpos.y >= height - EDGE_OFFSET && y > 0 ||
-      tpos.x <= EDGE_OFFSET && x < 0 ||
-      tpos.x >= width - EDGE_OFFSET && x > 0) {
+    if (tpos.y <= Camera.EDGE_OFFSET && y < 0 ||
+      tpos.y >= __HEIGHT__ - Camera.EDGE_OFFSET && y > 0 ||
+      tpos.x <= Camera.EDGE_OFFSET && x < 0 ||
+      tpos.x >= __WIDTH__ - Camera.EDGE_OFFSET && x > 0) {
       if (camera.focus == this) {
         camera.move(x, y);
         return;

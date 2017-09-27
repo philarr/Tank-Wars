@@ -1,6 +1,8 @@
 //Camera class - controls offset x and y for objects
 //Also does panning and focus on specific entity to follow its movement
 class Camera {
+  final static int EDGE_OFFSET = 150;
+
   PVector pos, vel, acc;
   Entity focus;
   Entity toFocus;
@@ -10,7 +12,6 @@ class Camera {
   int count = 0;
   ArrayList<Entity> queueItem;
   Entity player;
-
 
   Camera(float x, float y) {
     this.pos = new PVector(x, y);
@@ -26,94 +27,93 @@ class Camera {
     this.player = p;
   }
 
-
   void move(float x, float y) {
-    acc.add(new PVector(x, y));
+    this.acc.add(new PVector(x, y));
   }
 
   //Set camera to follow the object
-  void setFocus(Entity obj) {
-    if (focus != null) {
-      focus.tpos.set(focus.pos);
+  void setFocus(Entity entity) {
+    if (this.focus != null) {
+      this.focus.tpos.set(this.focus.pos);
     }
-    obj.tpos.sub(pos);
-    this.focus = obj;
-    vel.set(0, 0, 0);
+    entity.tpos.sub(this.pos);
+    this.focus = entity;
+    this.vel.set(0, 0, 0);
   }
 
-
-  void queue(Entity obj) {
-    this.queueItem.add(obj);
+  void queue(Entity entity) {
+    this.queueItem.add(entity);
   }
-
 
   //Pan camera to Entity
-  boolean goTo(Entity obj) {
-    if (panning) return false;
-    if (focus != null) {
-      focus.tpos.set(focus.pos);
+  boolean goTo(Entity entity) {
+    if (this.panning) return false;
+    if (this.focus != null) {
+      this.focus.tpos.set(this.focus.pos);
     }
-    focus = null;
-    toFocus = obj;
-    PVector mid = new PVector(width/2, height/2);
-    PVector diff = PVector.sub(obj.tpos, mid);
-    PVector diff2 = PVector.sub(pos, diff);
-    stopAt.set(diff);
+    this.focus = null;
+    this.toFocus = entity;
+    PVector mid = new PVector(__WIDTH__ / 2, __HEIGHT__ / 2);
+    PVector diff = PVector.sub(entity.tpos, mid);
+    PVector diff2 = PVector.sub(this.pos, diff);
+    this.stopAt.set(diff);
     diff2.div(60);
-    mr.set(diff2);
-    panning = true;
+    this.mr.set(diff2);
+    this.panning = true;
     return true;
   }
 
   //Centers onto object
-  void centerOn(Entity obj) {
-    setFocus(obj);
-    PVector mid = new PVector(width/2, height/2);
-    PVector diff = PVector.sub(mid, obj.tpos);
-    obj.tpos.add(diff);
-    pos.sub(diff);
+  void centerOn(Entity entity) {
+    this.setFocus(entity);
+    PVector mid = new PVector(__WIDTH__ / 2, __HEIGHT__ / 2);
+    PVector diff = PVector.sub(mid, entity.tpos);
+    entity.tpos.add(diff);
+    this.pos.sub(diff);
   }
 
   PVector getPos() {
-    return pos;
+    return this.pos;
   }
+
   PVector getVel() {
-    return vel;
+    return this.vel;
   }
 
   void focusPlayer() {
-    centerOn(player);
+    centerOn(this.player);
   }
 
-  boolean ifFocus(Entity obj) {
-    if (obj == this.focus) {
-      return true;
-    }
-    return false;
+  boolean isFocus(Entity entity) {
+    return entity == this.focus;
   }
 
   void update() {
     // If no pan item is queued, focus on player
-    if (!panning & queueItem.size() <= 0 && this.focus != player) goTo(player);
+    if (!this.panning & this.queueItem.size() <= 0 && this.focus != this.player) {
+      goTo(this.player);
+    }
     // Focus on pan items
-    if(!panning && queueItem.size() > 0) goTo(queueItem.get(0));
-    if (panning) {
-      count++;
-      if (count == 60) {
-        count = 0;
-        panning = false;
-        if (queueItem.size() > 0) queueItem.remove(0);
-        setFocus(toFocus);
+    if(!this.panning && this.queueItem.size() > 0) {
+      goTo(queueItem.get(0));
+    }
+    if (this.panning) {
+      this.count++;
+      if (this.count == 60) {
+        this.count = 0;
+        this.panning = false;
+        if (this.queueItem.size() > 0) this.queueItem.remove(0);
+        setFocus(this.toFocus);
       }
       else {
-        pos.add(new PVector(-mr.x, -mr.y ));
+        this.pos.add(new PVector(-this.mr.x, -this.mr.y ));
       }
     }
 
-    vel.add(acc);
-    vel.mult(0.8);
-    pos.add(vel);
-    acc.set(0, 0, 0);
+    this.vel.add(this.acc);
+    this.vel.mult(0.8);
+    this.pos.add(this.vel);
+    this.acc.set(0, 0, 0);
   }
 }
 
