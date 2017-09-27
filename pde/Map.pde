@@ -1,5 +1,6 @@
 /*
-  Instances of a level, elements can be "destroyed"
+  Map states and everything in it.
+  (Entity, walls, projectiles, enemy, players)
 */
 class Map {
   State container;
@@ -14,9 +15,9 @@ class Map {
  // Quadtree collisionMap = new Quadtree();
 
 
-  ArrayList<Widget> widgetList = new ArrayList<Widget>();
-  ArrayList<Cube> cubeList = new ArrayList<Cube>();
-  ArrayList<Enemy> enemyList = new ArrayList<Enemy>();
+  ArrayList<Widget> widgetList;
+  ArrayList<Cube> cubeList;
+  ArrayList<Enemy> enemyList;
   ArrayList<Projectile> playerProjectileList = new ArrayList<Projectile>();
   ArrayList<Projectile> enemyProjectileList = new ArrayList<Projectile>();
 
@@ -40,7 +41,6 @@ class Map {
     this.portal = Level.portal[stage];
     this.boss = Level.boss[stage];
 
-
     this.collision = new Quadtree({
       width: this.level.length * Asset.tileW,
       height: this.level.length * Asset.tileH
@@ -50,10 +50,10 @@ class Map {
   void start() {
     this.loadAsset();
     this.loadWall();
-    this.cubeList.addAll(this.loadCube());
-    this.widgetList.addAll(this.loadWidget(this.container.hud));
+    this.cubeList = this.loadCube();
+    this.widgetList = this.loadWidget(this.container.hud);
     this.widgetList.addAll(this.loadPortal(this.container));
-    this.enemyList.addAll(this.loadEnemy(this.container.player));
+    this.enemyList = this.loadEnemy(this.container.player);
     if (this.bossExist()) enemyList.add(this.loadBoss(this.container.hud, this.container.player, this.container));
 
     console.log(this.collision.pretty());
@@ -87,31 +87,33 @@ class Map {
     return !!this.boss && this.boss.length > 0;
   }
 
-  Boss loadBoss(UI hud, Player player, State s) {
-    return new Boss(this.boss[0], this.boss[1], camera, player, hud, s);
+  Enemy loadBoss(UI hud, Player player, State state) {
+    Boss b = new Boss(this.boss[0], this.boss[1], camera, player, hud, state);
+    this.collision.push(b, true);
+    return b;
   }
 
-  ArrayList loadWall() {
+  ArrayList<Entity> loadWall() {
     ArrayList<Entity> walls = new ArrayList<Entity>();
     for (int y = 0; y < this.level.length; y++) {
       for (int x = 0; x < this.level[y].length; x++) {
         if (this.level[y][x] == 1) {
           Entity w = new Entity((x * 50) + 25, (y * 50) + 25, 50, 50)
+          this.collision.push(w, true);
           walls.add(w);
-          this.collision.push(w.collision, true);
         }
       }
     }
     return walls;
   }
 
-  ArrayList loadPortal() {
+  ArrayList<Portal> loadPortal() {
     ArrayList<Portal> portals = new ArrayList<Portal>();
     if (!this.portal || this.portal.length == 0) return portals;
     for (int i = 0; i < this.portal.length; i++) {
       Portal p = new Portal(this.portal[i][0], this.portal[i][1], this.camera, this.container);
+      this.collision.push(p, true);
       portals.add(p);
-      this.collision.push(p.collision, true);
     }
     return portals;
   }
@@ -121,32 +123,32 @@ class Map {
     if (!this.cubes || this.cubes.length == 0) return cube;
     for (int i = 0; i < this.cubes.length; i++) {
       Cube c = new Cube(this.cubes[i][0], this.cubes[i][1], this.camera)
+      this.collision.push(c, true);
       cube.add(c);
-      this.collision.push(c.collision, true);
     }
     return cube;
   }
 
-  ArrayList loadEnemy(Player player) {
+  ArrayList<Enemy> loadEnemy(Player player) {
     ArrayList<Enemy> enemy = new ArrayList<Enemy>();
     if (!this.pathing || this.pathing.length == 0) return enemy;
     int[][] enemies = this.pathing;
 
     for (int i = 0; i < enemies.length; i++) {
-      ArrayList<int[]> enemypath = new ArrayList<int[]>();
+      ArrayList<int[]> enemyPath = new ArrayList<int[]>();
+      int startX = enemies[i][0][0];
+      int startY = enemies[i][0][1];
       for (int u = 0; u < enemies[i].length; u++) {
-        int spawnX = enemies[i][0][0];
-        int spawnY = enemies[i][0][1];
-        enemypath.add(enemies[i][u]);
+        enemyPath.add(enemies[i][u]);
       }
-      Enemy e = new Enemy(enemies[i][0][0], enemies[i][0][1], camera, enemypath, player);
+      Enemy e = new Enemy(startX, startY, camera, enemyPath, player);
+      this.collision.push(e, true);
       enemy.add(e);
-      this.collision.push(e.collision, true);
     }
     return enemy;
   }
 
-  ArrayList loadWidget(UI hud) {
+  ArrayList<Widget> loadWidget(UI hud) {
     int doorSearch;
     int addCount = 1;
     ArrayList<Widget> widget = new ArrayList<Widget>();
@@ -165,8 +167,8 @@ class Map {
           }
           if (doorSearch == this.level[y][x] && doorSearch != 0) {
             Door d = new Door(x, y, camera, hud, this.level);
+            this.collision.push(d, true);
             doors.add(d);
-            this.collision.push(d.collision, true);
             addCount += 1;
           }
         }
@@ -177,8 +179,8 @@ class Map {
           for (int x = 0; x < this.level[y].length; x++) {
             if (this.level[y][x] == triggerId) {
               Trigger t = new Trigger(x, y, camera, doors, hud)
+              this.collision.push(t, true);
               widget.add(t);
-              this.collision.push(t.collision, true);
             }
           }
         }
@@ -221,7 +223,6 @@ class Map {
   }
 
   void update() {
-    console.log(this.collision.colliding(this.container.player));
   }
 
   void draw() {

@@ -2,44 +2,38 @@ class Entity {
   int x, y;
   PVector pos, tpos; //pos - used as a TRUE position, tpos used as temporary position in case current entity is the camera's focus
   float w, h; //Unit width/height size for collision checks
-  boolean ignoreWall; //True to walk through walls
-  Camera camera; //Reference variable to the camera (needed to determine exact location)
-  int[] timer = new int[6]; //Timers to countdown (0 - unit collision timer, 1 - wall collision timer, 3 - reload timer, 4 - cooldown for taking damage, 5 - shake timer
+  boolean ignoreWall = false; //True to walk through walls
+   /* reference variable to the camera (needed to determine exact location) */
+  Camera camera;
+  /* timers to countdown (0 - unit collision timer, 1 - wall collision timer, 3 - reload timer, 4 - cooldown for taking damage, 5 - shake timer */
+  int[] timer = new int[6];
   Object collision;
 
   //Default settings for ALL entity (does not include walls)
 
   Entity(float x, float y, int w, int h) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    this.pos = new PVector(x, y);
-    this.tpos = new PVector(x, y);
-    this.ignoreWall = false;
     Entity self = this;
+    self.w = w;
+    self.h = h;
     self.x = x;
     self.y = y;
     self.width = w;
     self.height = h;
-    this.collision = self;
+    self.pos = new PVector(x, y);
+    self.tpos = new PVector(x, y);
   }
 
-  Entity(float x, float y, int w, int h, Camera obj) {
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    this.pos = new PVector(x, y);
-    this.tpos = new PVector(x, y);
-    this.camera = obj;
-    this.ignoreWall = false;
+  Entity(float x, float y, int w, int h, Camera camera) {
     Entity self = this;
     self.x = x;
     self.y = y;
+    self.w = w;
+    self.h = h;
     self.width = w;
     self.height = h;
-    this.collision = self;
+    self.pos = new PVector(x, y);
+    self.tpos = new PVector(x, y);
+    self.camera = camera;
   }
 
   //If any timers are > 0, begin counting down
@@ -47,8 +41,15 @@ class Entity {
     for (int i=0; i<timer.length; i++) {
       if (timer[i] > 0) timer[i] -= 1;
     }
-    this.collision.x = pos.x;
-    this.collision.y = pos.y;
+    updateCollision();
+  }
+
+  void updateCollision() {
+    Entity self = this;
+    int x = int(self.pos.x);
+    int y = int(self.pos.y);
+    if (x != self.x) self.x = x;
+    if (y != self.y) self.y = y;
   }
 
   //This translate version takes into account of the camera's focus and whether or not it needed the offset added

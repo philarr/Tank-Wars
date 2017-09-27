@@ -5,10 +5,8 @@ class Trigger extends Widget {
   Entity onObj; //the entity that is on it
 
   Trigger(float x, float y, Camera camera, ArrayList doors, HUD h) {
-    super(x, y, 30, 30, camera);
+    super(x, y, TriggerDef.WIDTH, TriggerDef.HEIGHT, camera);
     this.hud = h;
-    this.w = 30;
-    this.h = 30;
     d.addAll(doors);
   }
 

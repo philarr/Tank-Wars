@@ -13,11 +13,30 @@ class Enemy extends Unit {
   boolean targetPlayer; //If it is currently targeting the player within its aggro radius
   Player player; //Reference variable to the player
 
-  final static int w = 50;
-  final static int h = 50;
+  Enemy(float x, float y, int w, int h, Camera camera, ArrayList pathing, Player player) {
+    super(x, y, w, h, camera);
+    if (pathing != null) {
+      this.pathing = pathing;
+    }
+    this.currentPath = -1;
+    this.dir = false;
+    this.moving = false;
+    this.moveamount = 0;
+    this.toMove = new PVector();
+    this.moveSpeed = 1;
+    this.player = player;
+    this.aggroRadius = 250;
+    this.reload = 100;
+    this.targetPlayer = false;
+    this.health = 100;
+    this.healthMax = 100;
+    this.weapon = 2;
+    this.dmg = 10;
+    this.chargeTime = 1;
+  }
 
-  Enemy(float x, float y, Camera obj, ArrayList pathing, Player player) {
-    super(x, y, 50, 50, obj);
+  Enemy(float x, float y, Camera camera, ArrayList pathing, Player player) {
+    super(x, y, EnemyDef.WIDTH, EnemyDef.HEIGHT, camera);
     if (pathing != null) {
       this.pathing = pathing;
     }
@@ -64,13 +83,13 @@ class Enemy extends Unit {
   }
 
   //If it is hit, decrease health
-  void isHit(Unit obj, int damage) {
+  void isHit(Unit unit, int damage) {
     this.health -= damage;
     if (this.health <= 0 && timer[5] == 0) timer[5] = 50;
     this.timer[4] = 30;
 
     if (this.timer[0] > 0 || this.timer[1] > 0 || this.timer[2] > 0) return;
-    this.move(obj.tvel.x*3, obj.tvel.y*3);
+    this.move(unit.tvel.x*3, unit.tvel.y*3);
 
     this.timer[2] = 10;
     this.timer[0] = 0;

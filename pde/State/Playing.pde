@@ -26,14 +26,11 @@ class Playing extends State {
     hud = new UI(camera, player);
     camera.setPlayer(player);
 
+    map.start();
     this.widget = map.widgetList;
     this.enemy = map.enemyList;
     this.cube = map.cubeList;
-
-    map.start();
-
   }
-
 
   //Checks if object is within screen region
   boolean inScreen(Entity obj) {

@@ -17,7 +17,7 @@ class Boss extends Enemy {
 
   //Class constructor
   Boss(float x, float y, Camera obj, Player player, UI hud, State s) {
-    super(x, y, 100, 100, obj, null, player);
+    super(x, y, BossDef.WIDTH, BossDef.HEIGHT, obj, null, player);
     //Difficulty at start of battle
     this.intro = false;
     this.phase1 = false;

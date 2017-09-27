@@ -1,3 +1,4 @@
+const io = require('socket.io');
 const http = require('http').createServer();
 
 const options = {
@@ -6,8 +7,8 @@ const options = {
   wsEngine: 'uws'
 };
 
-const io = require('socket.io')(3000, options);
+const app = io(3000, options);
 
-io.on('connection', (socket) => {
+app.on('connection', (socket) => {
   console.log('a user connected');
 });

@@ -9,8 +9,8 @@ class Player extends Unit {
   static PImage ASSET_BASE;
   static PImage ASSET_TURRET;
 
-  Player(PVector spawn, Camera obj) {
-    super(spawn.x, spawn.y, 50, 50, obj);
+  Player(PVector start, Camera obj) {
+    super(start.x, start.y, PlayerDef.WIDTH, PlayerDef.HEIGHT, obj);
     this.moveSpeed = 1;
     this.fade = 0;
     this.health = 500;
