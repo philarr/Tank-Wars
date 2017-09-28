@@ -116,7 +116,9 @@ class Enemy extends Unit {
     popMatrix();
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
-    if (targetPlayer && this.health > 0) rotate(atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x));
+    if (this.player && targetPlayer && this.health > 0) {
+      rotate(atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x));
+    }
     image(asset.get("enemy_turret"), -(this.w*3)/15, -this.h/6);
     popMatrix();
 

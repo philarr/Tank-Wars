@@ -18,12 +18,13 @@ class Playing extends State {
   }
 
   void start() {
-    this.map = new Map(this);
-    this.player = new Player(this.map.getPlayerStart());
-    narrator.setCamera(this.player);
-    this.ui = new UI(this.player);
+    this.camera = new Camera(-350, -350);
+    narrator.setCamera(this.camera);
 
-    this.camera = this.player.camera;
+    this.map = new Map(this);
+    this.player = new Player(this.map.getPlayerStart(), this.camera);
+    this.camera.setPlayer(this.player);
+    this.ui = new UI(this.player);
     this.mapc = map.getCollision();
 
     this.widget = map.widgetList;
@@ -126,9 +127,9 @@ class Playing extends State {
 
     /**********/
     if (!isPaused()) {
-      camera.update();
-      ui.update();
-      if (camera.focus == this.player) {
+      this.camera.update();
+      this.ui.update();
+      if (this.camera.focus != null) {
         if (input.STATE_UP) camera.focus.move(0, -1);
         if (input.STATE_DOWN) camera.focus.move(0, 1);
         if (input.STATE_LEFT) camera.focus.move(-1, 0);

@@ -34,7 +34,7 @@ void draw() {
 
 void keyPressed() {
   input.keyDown();
-  if (Input.isEnter()) return narrator.interceptEnter();
+  if (Input.isEnter() && narrator.interceptEnter()) return;
   game.keyDown();
 }
 

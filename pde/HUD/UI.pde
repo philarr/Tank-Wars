@@ -3,16 +3,13 @@ class UI {
   Player player = null; //Reference variable to the player
   int meterFlicker = 0; //Charge meter flicker animation
 
-  UI() {}
-
   UI(Player player) {
-    super();
     this.player = !!player ? player : null;
   }
 
   void drawWeapon() {
     textSize(16);
-    if this.player.weapon == 0) {
+    if (this.player.weapon == 0) {
       pushMatrix();
       translate(width-88, height-75);
       image(asset.get("hudsmallbox"), 0, 0, 63, 63);

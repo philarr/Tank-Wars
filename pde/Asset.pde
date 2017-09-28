@@ -16,8 +16,8 @@ class Asset {
     this.images.put("Title1", loadImage(imgFolder + "Title1.png"));
     this.images.put("Title2", loadImage(imgFolder + "Title2.png"));
     this.images.put("Title_", loadImage(imgFolder + "Title_.png"));
-    this.images.put("door", loadImage(imgFolder + "Tile/door.png"));
-    this.images.put("wall", loadImage(imgFolder + "Tile/wall.png"));
+    this.images.put("door", loadImage(tileFolder + "door.png"));
+    this.images.put("wall", loadImage(tileFolder + "wall.png"));
     this.images.put("trigger", loadImage(imgFolder + "trigger.png"));
     this.images.put("block", loadImage(imgFolder + "block.png"));
     this.images.put("hudbox", loadImage(imgFolder + "hudbox.png"));

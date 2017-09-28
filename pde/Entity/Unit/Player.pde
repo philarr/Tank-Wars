@@ -8,16 +8,15 @@ class Player extends Unit {
   PImage ASSET_BASE;
   PImage ASSET_TURRET;
 
-  Player(PVector start) {
-    super(start.x, start.y, PlayerDef.WIDTH, PlayerDef.HEIGHT);
+  Player(PVector start, Camera camera) {
+    super(start.x, start.y, PlayerDef.WIDTH, PlayerDef.HEIGHT, camera);
     this.moveSpeed = 1;
     this.fade = 0;
     this.health = 500;
     this.reload = 20;
     this.chargeTime = 0;
-    this.camera.setFocus(this);
     ASSET_BASE = asset.get(PlayerDef.ASSET_BASE);
-    ASSET_TURRET = asset.get(PlayerDef.ASSET_BASE);
+    ASSET_TURRET = asset.get(PlayerDef.ASSET_TURRET);
   }
 
   //Increase charge time (used from the key down event)

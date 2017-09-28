@@ -30,7 +30,9 @@ class Map {
     for (int y = 0; y < map.level.length; y++) {
       for (int x = 0; x < map.level[y].length; x++) {
         if (map.level[y][x] == 1) {
-          Entity w = new Entity((x * 50) + 25, (y * 50) + 25, 50, 50)
+          int pX = (x * LevelDef.TILE_WIDTH) + LevelDef.TILE_WIDTH/2;
+          int pY = (y * LevelDef.TILE_HEIGHT) + LevelDef.TILE_HEIGHT/2;
+          Entity w = new Entity(pX, pY, LevelDef.TILE_WIDTH, LevelDef.TILE_HEIGHT)
           map.collision.push(w, true);
           wall.add(w);
         }
@@ -67,13 +69,13 @@ class Map {
     int[][] enemies = map.pathing;
 
     for (int i = 0; i < enemies.length; i++) {
-      ArrayList<int[]> enemyPath = new ArrayList<int[]>();
+      ArrayList<int[]> path = new ArrayList<int[]>();
       int startX = enemies[i][0][0];
       int startY = enemies[i][0][1];
       for (int u = 0; u < enemies[i].length; u++) {
-        enemyPath.add(enemies[i][u]);
+        path.add(enemies[i][u]);
       }
-      Enemy e = new Enemy(startX, startY, enemyPath, map.player);
+      Enemy e = new Enemy(startX, startY, map.camera, path, map.player);
       map.collision.push(e, true);
       enemy.add(e);
     }
@@ -98,7 +100,7 @@ class Map {
             }
           }
           if (doorSearch == map.level[y][x] && doorSearch != 0) {
-            Door d = new Door(x, y, camera, Door.direction(x, y, map.level));
+            Door d = new Door(x, y, Door.direction(x, y, map.level));
             map.collision.push(d, true);
             doors.add(d);
             addCount += 1;
@@ -147,12 +149,13 @@ class Map {
   }
 
   void start() {
-    this.loadWall();
-    this.cubeList.addAll(Map.loadCube(this));
-    this.widgetList.addAll(Map.loadWidget(this));
-    this.widgetList.addAll(Map.loadPortal(this));
-    this.enemyList.addAll(Map.loadEnemy(this));
-    if (this.bossExist()) this.enemyList.add(Map.loadBoss(this));
+    Map self = this;
+    this.loadWall(self);
+    this.cubeList.addAll(Map.loadCube(self));
+    this.widgetList.addAll(Map.loadWidget(self));
+    this.widgetList.addAll(Map.loadPortal(self));
+    this.enemyList.addAll(Map.loadEnemy(self));
+    if (this.bossExist()) this.enemyList.add(Map.loadBoss(self));
 
     console.log(this.collision.pretty());
   }

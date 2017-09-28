@@ -7,7 +7,7 @@ class Door extends Widget {
 
   PImage ASSET_BASE;
 
-  static int getDirection(int x, int y, int[][] level) {
+  static int direction(int x, int y, int[][] level) {
     if (level[y][x+1] == 1) return DoorDef.SLIDE_LEFT;
     if (level[y][x-1] == 1) return DoorDef.SLIDE_RIGHT;
     if (level[y+1][x] == 1) return DoorDef.SLIDE_DOWN;
@@ -15,9 +15,8 @@ class Door extends Widget {
   }
 
   Door(float x, float y, Camera camera) {
-    super(x, y, 50, 50, camera);
+    super(x, y, DoorDef.WIDTH, DoorDef.HEIGHT, camera);
     this.timer = 0;
-    this.level = level;
     this.open = false;
     ASSET_BASE = asset.get(DoorDef.ASSET_BASE);
   }
