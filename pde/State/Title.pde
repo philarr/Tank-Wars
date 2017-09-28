@@ -1,10 +1,9 @@
 class Title extends State {
-  int background1 = 0;
-  int background2 = -1 * __WIDTH__;
+  int bgPos1 = 0;
+  int bgPos2 = -1 * __WIDTH__;
   int fadeIn = 0;
   int menuNum = 0;
   State[] gameState;
-  UI hud;
 
   private Str[] menuOptions = [
     "Start Game",
@@ -30,7 +29,7 @@ class Title extends State {
         ArrayList<Dialogue> about = new ArrayList<Dialogue>();
         about.add(new Dialogue(-1, null, "Welcome to Tank Wars! \n\n (...)"));
         about.add(new Dialogue(-1, "Controls", "Movement: <W> <A> <S> <D> / Mouse: (Aiming) \nShoot: <Space> / Charge: <Space> + hold \nSwitch Weapon: <R>"));
-        this.hud.say(about);
+        narrator.say(about);
         break;
       default:
         break;
@@ -38,14 +37,20 @@ class Title extends State {
   }
 
   Title(State[] gameState) {
-    //this.block = true;
     this.gameState = gameState;
-    this.hud = new UI();
+  }
+
+  void drawBackground() {
+    image(asset.get("Title2"), bgPos1++, 0);
+    image(asset.get("Title2"), bgPos2++, 0);
+    image(asset.get("Title1"), 0, 0);
+    if (bgPos1 >= __WIDTH__) bgPos1 = -1 * __WIDTH__;
+    if (bgPos2 >= __WIDTH__) bgPos2 = -1 * __WIDTH__;
   }
 
   void drawLogo() {
     tint(255, this.fadeIn);
-    image(asset.img.get(7), width/2-(539/2)-31, height/2-(179/2)-50);
+    image(asset.get("Title_"), width/2-(539/2)-31, height/2-(179/2)-50);
     noTint();
   }
 
@@ -70,21 +75,12 @@ class Title extends State {
   }
 
   void update() {
-    image(asset.img.get(6), background1++, 0);
-    image(asset.img.get(6), background2++, 0);
-    image(asset.img.get(5), 0, 0);
-
+    drawBackground()
     drawLogo();
-
     this.fadeIn += this.fadeIn != 255 ? 3 : 0;
     if (this.fadeIn >= 100) {
       drawMenu();
     }
-
-    if (background1 >= __WIDTH__) background1 = -1 * __WIDTH__;
-    if (background2 >= __WIDTH__) background2 = -1 * __WIDTH__;
-
-    this.hud.update();
   }
 
   void keyDown() {
@@ -97,7 +93,6 @@ class Title extends State {
     }
 
     if (Input.isEnter()) {
-      if (this.hud.interceptEnter()) return;
       this.handleMenuInteract(this.menuNum);
     }
   }

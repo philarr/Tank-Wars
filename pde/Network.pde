@@ -11,7 +11,6 @@ class Network {
   Boolean isStarted = false;
   int latency = 0;
   Socket socket;
-  HUD hud;
 
   Network(serverUrl) {
     this.serverUrl = serverUrl;

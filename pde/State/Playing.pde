@@ -1,10 +1,9 @@
 class Playing extends State {
   Camera camera;
   Player player;
-  LevelSession level;
   Map map;
   int[][] mapc;
-  UI hud;
+  UI ui;
   ArrayList<Widget> widget;
   ArrayList<Cube> cube;
   ArrayList<Enemy> enemy;
@@ -19,24 +18,27 @@ class Playing extends State {
   }
 
   void start() {
-    this.camera = new Camera(-350, -350);
     this.map = new Map(this);
-    this.mapc = map.getCollision();
-    this.player = new Player(this.map.getPlayerStart(), this.camera);
-    this.hud = new UI(this.camera, this.player);
-    this.camera.setPlayer(this.player);
+    this.player = new Player(this.map.getPlayerStart());
+    narrator.setCamera(this.player);
+    this.ui = new UI(this.player);
 
-    this.map.start();
+    this.camera = this.player.camera;
+    this.mapc = map.getCollision();
+
     this.widget = map.widgetList;
     this.enemy = map.enemyList;
     this.cube = map.cubeList;
+    this.map.start();
   }
 
   //Checks if object is within screen region
-  boolean inScreen(Entity obj) {
-    if ((obj.tpos.x-obj.w/2)-camera.pos.x < width && (obj.tpos.x+obj.w/2)-camera.pos.x > 0
-      &&  (obj.tpos.y-obj.h/2)-camera.pos.y < height && (obj.tpos.y+obj.h/2)-camera.pos.y > 0
-      ||  camera.isFocus(obj)) return true;
+  boolean inScreen(Entity entity) {
+    if ((entity.tpos.x-entity.w/2) - this.camera.pos.x < width
+    && (entity.tpos.x+entity.w/2) - this.camera.pos.x > 0
+    && (entity.tpos.y-entity.h/2) - this.camera.pos.y < height
+    && (entity.tpos.y+entity.h/2) - this.camera.pos.y > 0
+    || camera.isFocus(entity)) return true;
     return false;
   }
 
@@ -125,8 +127,8 @@ class Playing extends State {
     /**********/
     if (!isPaused()) {
       camera.update();
-      hud.update();
-      if (camera.focus != null) {
+      ui.update();
+      if (camera.focus == this.player) {
         if (input.STATE_UP) camera.focus.move(0, -1);
         if (input.STATE_DOWN) camera.focus.move(0, 1);
         if (input.STATE_LEFT) camera.focus.move(-1, 0);
@@ -158,7 +160,6 @@ class Playing extends State {
 
   void keyUp() {
     if (Input.isEnter()) {
-      if (hud.interceptEnter() || isPaused()) return;
       player.shoot(mouseX, mouseY, player.chargeTime, 10, player.reload, playerProjectile);
       player.chargeTime = 0;
     }

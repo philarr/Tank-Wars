@@ -1,19 +1,17 @@
 //Trigger that opens door
 class Trigger extends Widget {
-  HUD hud;
   ArrayList<Door> door = new ArrayList<Door>();
   Entity onObj; //the entity that is on it
 
-  Trigger(float x, float y, Camera camera, ArrayList doors, HUD hud) {
+  Trigger(float x, float y, Camera camera, ArrayList doors) {
     super(x, y, TriggerDef.WIDTH, TriggerDef.HEIGHT, camera);
-    this.hud = hud;
     this.door.addAll(doors);
   }
 
   void draw() {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
-    image(asset.img.get(9), -18, -18, 36, 36);
+    image(asset.get("trigger"), -18, -18, 36, 36);
     popMatrix();
   }
 
@@ -26,7 +24,7 @@ class Trigger extends Widget {
       for (int i = 0; i < this.door.size(); i++) {
         this.camera.queue(this.door.get(i));
         this.door.get(i).unlock();
-        hud.say1(new Dialogue(100, null, "Switch activated!  \n\n<Space> to skip."));
+        narrator.say1(new Dialogue(100, null, "Switch activated!  \n\n<Space> to skip."));
       }
     }
     //Player moves out of tile..

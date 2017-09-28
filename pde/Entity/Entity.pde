@@ -21,6 +21,7 @@ class Entity {
     self.height = h;
     self.pos = new PVector(x, y);
     self.tpos = new PVector(x, y);
+    self.camera = new Camera(0, 0);
   }
 
   Entity(float x, float y, int w, int h, Camera camera) {

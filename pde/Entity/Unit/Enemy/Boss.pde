@@ -1,7 +1,6 @@
 //Boss class - Scripting
 
 class Boss extends Enemy {
-  UI hud; //Reference variable to the hud instance
   boolean intro; //Say something when the level starts
   boolean phase1; //Set phase difficulty
   boolean phase2; // ^
@@ -16,17 +15,16 @@ class Boss extends Enemy {
   State state; //Reference variable to the current state
 
   //Class constructor
-  Boss(float x, float y, Camera obj, Player player, UI hud, State s) {
-    super(x, y, BossDef.WIDTH, BossDef.HEIGHT, obj, null, player);
+  Boss(float x, float y, State state) {
+    super(x, y, BossDef.WIDTH, BossDef.HEIGHT, camera, null, player);
     //Difficulty at start of battle
     this.intro = false;
     this.phase1 = false;
     this.phase2 = false;
     this.phase3 = false;
     this.phase4 = false;
-    this.hud = hud;
-    this.health = 2000;
-    this.healthMax = 2000;
+    this.health = BossDef.HEALTH * 1;
+    this.healthMax = BossDef.HEALTH;
     this.aggroRadius = 400;
     this.reload = 90;
     this.weapon = 2;
@@ -37,7 +35,7 @@ class Boss extends Enemy {
     this.dblProc = 700;
     this.ramCD = 800;
     this.fade = 125;
-    this.state = s;
+    this.state = state;
   }
 
   //isHit - overridden from Unit superclass so it can perform Boss specific actions
@@ -65,9 +63,9 @@ class Boss extends Enemy {
         //Phase 3 - taunt when player try to cancel the shake
         if (phase3 && timer[5] > 0) {
           int randomSpeech = int(random(3));
-          if (randomSpeech == 0) hud.say1(new Dialogue(240, "Boss", "I'm unstoppable!", true));
-          if (randomSpeech == 1) hud.say1(new Dialogue(240, "Boss", "Nothing can stop me!", true));
-          if (randomSpeech == 2) hud.say1(new Dialogue(240, "Boss", "You think that will stop me?!", true));
+          if (randomSpeech == 0) narrator.say1(new Dialogue(240, "Boss", "I'm unstoppable!", true));
+          if (randomSpeech == 1) narrator.say1(new Dialogue(240, "Boss", "Nothing can stop me!", true));
+          if (randomSpeech == 2) narrator.say1(new Dialogue(240, "Boss", "You think that will stop me?!", true));
         }
         else {
           //Reset boss to normal behaviour
@@ -101,7 +99,7 @@ class Boss extends Enemy {
 
     //If intro speech has not been said yet
     if (!intro) {
-      hud.say1(new Dialogue(240, "Boss", "You are no match for me!", true));
+      narrator.say1(new Dialogue(240, "Boss", "You are no match for me!", true));
       this.intro = true;
     }
 
@@ -136,7 +134,7 @@ class Boss extends Enemy {
     if (this.health < 1850) {
       //PHASE 1 - Shoots max charge projectiles
       if (!phase1) {
-        hud.say1(new Dialogue(240, "Boss", "Looks like I need more fire power!", true));
+        narrator.say1(new Dialogue(240, "Boss", "Looks like I need more fire power!", true));
         timer[5] = 100;
         this.reload = 80;
         this.weapon = 4;
@@ -148,7 +146,7 @@ class Boss extends Enemy {
     if (this.health < 1450) {
       //PHASE 2 - Ram the player (goes through walls)
       if (!phase2) {
-        hud.say1(new Dialogue(240, "Boss", "You can't hide from me!", true));
+        narrator.say1(new Dialogue(240, "Boss", "You can't hide from me!", true));
         this.ramCooldown = 0;
         phase2 = true;
       }
@@ -170,7 +168,7 @@ class Boss extends Enemy {
     if (this.health < 950) {
       //PHASE 3 - Spam projectiles at player, lower ram cooldown + lower shake time, higher chance of double shot and uncancellable ram
       if (!phase3) {
-        hud.say1(new Dialogue(240, "Boss", "Die!", true));
+        narrator.say1(new Dialogue(240, "Boss", "Die!", true));
         phase3 = true;
         timer[5] = 50;
         this.reload = 55;
@@ -184,7 +182,7 @@ class Boss extends Enemy {
     if (this.health < 200) {
       //PHASE 4 - angrier version of phase 3
       if (!phase4) {
-        hud.say1(new Dialogue(240, "Boss", "!!!!!", true));
+        narrator.say1(new Dialogue(240, "Boss", "!!!!!", true));
         timer[5] = 50;
         this.phase4 = true;
         this.reload = 20;
@@ -212,12 +210,12 @@ class Boss extends Enemy {
     if (down) rotate(radians(180));
     if (left) rotate(radians(-90));
     if (right) rotate(radians(90));
-    image(asset.img.get(14), -50, -50);
+    image(asset.get("boss"), -50, -50);
     popMatrix();
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
     if (this.health > 0) rotate(atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x));
-    image(asset.img.get(15), -(this.width*2)/15, -this.height/4);
+    image(asset.get("boss_turret"), -(this.width*2)/15, -this.height/4);
     noTint();
     popMatrix();
     //Shows the HP bar temporary when it has been hit

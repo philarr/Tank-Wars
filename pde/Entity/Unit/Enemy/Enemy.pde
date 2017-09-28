@@ -5,7 +5,7 @@ class Enemy extends Unit {
   boolean dir; //Which direction (going forward on its path or go back)
   boolean moving; //If its currently moving
   PVector toMove; //How much left to move
-  int moveamount; //How much will it be able to move
+  int moveAmount; //How much will it be able to move
   int aggroRadius; //The radius where it can shoot the player
   int reload; //Reload time
   int dmg; //Damage it does when it touches player
@@ -21,7 +21,7 @@ class Enemy extends Unit {
     this.currentPath = -1;
     this.dir = false;
     this.moving = false;
-    this.moveamount = 0;
+    this.moveAmount = 0;
     this.toMove = new PVector();
     this.moveSpeed = 1;
     this.player = player;
@@ -43,17 +43,17 @@ class Enemy extends Unit {
     this.currentPath = -1;
     this.dir = false;
     this.moving = false;
-    this.moveamount = 0;
+    this.moveAmount = 0;
     this.toMove = new PVector();
     this.moveSpeed = 1;
     this.player = player;
     this.aggroRadius = 250;
     this.reload = 100;
     this.targetPlayer = false;
-    this.health = 100;
-    this.healthMax = 100;
-    this.weapon = 2;
-    this.dmg = 10;
+    this.health = EnemyDef.HEALTH * 1;
+    this.healthMax = EnemyDef.HEALTH;
+    this.weapon = EnemyDef.WEAPON;
+    this.dmg = EnemyDef.DAMAGE;
     this.chargeTime = 1;
   }
 
@@ -64,9 +64,9 @@ class Enemy extends Unit {
 
     else {
       super.update();
-      if (moveamount > 0) {
+      if (moveAmount > 0) {
         move(-toMove.x/2, -toMove.y/2);
-        moveamount -= 1;
+        moveAmount -= 1;
       }
       else {
         if (currentPath == pathing.size()-1) dir = true;
@@ -75,8 +75,8 @@ class Enemy extends Unit {
         else currentPath += 1;
         int[] nextXY = pathing.get(currentPath);
         toMove = PVector.sub(tpos, new PVector(nextXY[0]*50, nextXY[1]*50));
-        moveamount =  50;
-        toMove.div(moveamount);
+        moveAmount =  50;
+        toMove.div(moveAmount);
         moving = true;
       }
     }
@@ -94,8 +94,6 @@ class Enemy extends Unit {
     this.timer[2] = 10;
     this.timer[0] = 0;
     this.timer[1] = 0;
-
-
   }
 
   //Draws the aggro radius circle
@@ -107,7 +105,6 @@ class Enemy extends Unit {
     popMatrix();
   }
 
-
   void draw() {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
@@ -115,12 +112,12 @@ class Enemy extends Unit {
     if (down) rotate(radians(180));
     if (left) rotate(radians(-90));
     if (right) rotate(radians(90));
-    image(asset.img.get(3), -25, -35);
+    image(asset.get("enemy"), -25, -35);
     popMatrix();
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
     if (targetPlayer && this.health > 0) rotate(atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x));
-    image(asset.img.get(4), -(this.w*3)/15, -this.h/6);
+    image(asset.get("enemy_turret"), -(this.w*3)/15, -this.h/6);
     popMatrix();
 
     if (timer[4] > 0) {

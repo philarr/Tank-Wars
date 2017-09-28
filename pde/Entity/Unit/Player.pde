@@ -5,19 +5,19 @@ class Player extends Unit {
   int reload; //Reload
   int chargeTime; //The time you charged
   boolean dead;
+  PImage ASSET_BASE;
+  PImage ASSET_TURRET;
 
-  static PImage ASSET_BASE;
-  static PImage ASSET_TURRET;
-
-  Player(PVector start, Camera obj) {
-    super(start.x, start.y, PlayerDef.WIDTH, PlayerDef.HEIGHT, obj);
+  Player(PVector start) {
+    super(start.x, start.y, PlayerDef.WIDTH, PlayerDef.HEIGHT);
     this.moveSpeed = 1;
     this.fade = 0;
     this.health = 500;
     this.reload = 20;
     this.chargeTime = 0;
-    ASSET_BASE = asset.img.get(1);
-    ASSET_TURRET = asset.img.get(2);
+    this.camera.setFocus(this);
+    ASSET_BASE = asset.get(PlayerDef.ASSET_BASE);
+    ASSET_TURRET = asset.get(PlayerDef.ASSET_BASE);
   }
 
   //Increase charge time (used from the key down event)
@@ -73,7 +73,6 @@ class Player extends Unit {
       fade = 0;
       hitAnimate = false;
     }
-
     drawBase();
     drawTurret();
   }

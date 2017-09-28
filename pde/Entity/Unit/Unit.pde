@@ -6,8 +6,8 @@ class Unit extends Entity {
   int weapon; //The current weapon
   boolean up, down, left, right; //Which directin it is going
 
-  Unit(float x, float y, int w, int h, Camera obj) {
-    super(x*50, y*50, w, h, obj);
+  Unit(float x, float y, int w, int h, Camera camera) {
+    super(x * 50, y * 50, w, h, camera);
     this.vel = new PVector();
     this.tvel = new PVector();
     this.acc = new PVector();
@@ -20,7 +20,7 @@ class Unit extends Entity {
     super.update();
 
     //If this Unit is the camera's focused, add its temporary position and camera's offset to get
-    if (camera.isFocus(this)) {
+    if (this.camera && camera.isFocus(this)) {
       this.pos.set(PVector.add(this.tpos, camera.pos));
       this.vel.set(PVector.add(this.tvel, camera.vel));
     }
@@ -29,7 +29,7 @@ class Unit extends Entity {
       this.vel.set(this.tvel);
     }
     tvel.add(tacc);
-    tvel.mult(0.8);
+    tvel.mult(UnitDef.FRICTION);
     tpos.add(tvel);
     tacc.set(0, 0, 0);
 
@@ -42,7 +42,7 @@ class Unit extends Entity {
 
   void resolveBlock() {
     if (timer[1] > 0) return;
-    if (camera.isFocus(this)) {
+    if (this.camera && this.camera.isFocus(this)) {
       tvel.add(camera.getVel());
       camera.pos.sub(camera.vel);
       camera.vel.mult(-1);
@@ -79,24 +79,27 @@ class Unit extends Entity {
 
   //Move if not bouncing back from collision and not shaking
   void move(float x, float y) {
-    if (timer[0] > 0 || timer[1] > 0 || timer[2] > 0 || timer[5] > 0) return;
+    if (this.timer[0] > 0 ||
+        this.timer[1] > 0 ||
+        this.timer[2] > 0 ||
+        this.timer[5] > 0) return;
 
-    up = y > 0;
-    down = y < 0;
-    left = x < 0;
-    right = x > 0;
+    this.up = y > 0;
+    this.down = y < 0;
+    this.left = x < 0;
+    this.right = x > 0;
 
     x = x * moveSpeed;
     y = y * moveSpeed;
 
     // Move camera along with Unit if passes EDGE_OFFSET
-    if (tpos.y <= Camera.EDGE_OFFSET && y < 0 ||
-      tpos.y >= __HEIGHT__ - Camera.EDGE_OFFSET && y > 0 ||
-      tpos.x <= Camera.EDGE_OFFSET && x < 0 ||
-      tpos.x >= __WIDTH__ - Camera.EDGE_OFFSET && x > 0) {
-      if (camera.focus == this) {
-        camera.move(x, y);
-        return;
+    if (camera.focus == this) {
+      if (tpos.y <= Camera.EDGE_OFFSET && y < 0 ||
+        tpos.y >= __HEIGHT__ - Camera.EDGE_OFFSET && y > 0 ||
+        tpos.x <= Camera.EDGE_OFFSET && x < 0 ||
+        tpos.x >= __WIDTH__ - Camera.EDGE_OFFSET && x > 0) {
+          camera.move(x, y);
+          return;
       }
     }
 

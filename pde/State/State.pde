@@ -14,6 +14,10 @@ class State {
     this.id = id;
   }
 
+  void setBlock() {
+    this.block = true;
+  }
+
   boolean isBlocked() {
     return this.block;
   }

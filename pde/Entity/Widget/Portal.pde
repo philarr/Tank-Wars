@@ -1,6 +1,5 @@
 //The portal to move onto the next state
 class Portal extends Widget {
-  HUD hud;
   State state;
 
   Portal(float x, float y, Camera camera, State state) {

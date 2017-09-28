@@ -8,7 +8,7 @@ class Cube extends Unit {
   void draw() {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
-    image(asset.img.get(10), -this.w/2, -this.h/2, 50, 50);
+    image(asset.get("block"), -this.w/2, -this.h/2, 50, 50);
     popMatrix();
   }
 
