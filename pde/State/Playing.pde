@@ -35,7 +35,7 @@ class Playing extends State {
   void update() {
     background(30, 30, 30);
 
-    this.map.update();
+    if (!this.isPaused()) this.map.update();
     this.map.draw();
 
     /**********/

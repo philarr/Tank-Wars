@@ -1,5 +1,5 @@
 class Wall extends Widget {
-  String name = WallDef.NAME;
+  static String name = "Wall";
   boolean SHADOW_BOTTOM;
   boolean SHADOW_RIGHT;
 
@@ -15,7 +15,8 @@ class Wall extends Widget {
     translate2(tpos.x, tpos.y);
     fill(255, 53, 62);
     noStroke();
-    image(asset.get(WallDef.ASSET_BASE), -this.w/2, -this.h/2);
+
+    image(ASSET_BASE, -this.w/2, -this.h/2);
     popMatrix();
   }
 
@@ -31,7 +32,6 @@ class Wall extends Widget {
   void update() {}
 
   boolean resolveBlock(Entity entity) {
-    console.log('walled ->', entity);
     return false;
   }
 

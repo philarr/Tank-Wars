@@ -1,6 +1,6 @@
 //Boss class - Scripting
 class Boss extends Enemy {
-  String name = BossDef.NAME;
+  static String name = "Boss";
   boolean intro; //Say something when the level starts
   boolean phase1; //Set phase difficulty
   boolean phase2; // ^

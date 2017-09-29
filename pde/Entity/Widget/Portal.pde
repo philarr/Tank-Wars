@@ -1,7 +1,7 @@
 //The portal to move onto the next state
 class Portal extends Widget {
+  static String name = "Portal";
   State state;
-  String name = PortalDef.NAME;
 
   Portal(float x, float y, Camera camera, State state) {
     super(x, y, PortalDef.WIDTH, PortalDef.HEIGHT, camera);

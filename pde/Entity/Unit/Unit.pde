@@ -1,6 +1,6 @@
 //Unit class to describe any Entity that is moveable
 class Unit extends Entity {
-  String name = UnitDef.NAME;
+  static String name = "Unit";
   PVector acc, vel, tvel, tacc; //Used to calculate movement, tvel + tacc is used in case this Unit is the camera's focus
   float health; //Health for this unit
   int moveSpeed; //Movement speed
@@ -30,8 +30,8 @@ class Unit extends Entity {
     }
   }
 
-  boolean resolveBlock(Entity entity) {
-    if (timer[1] > 0 || this.owner == entity) return false;
+  void bounceBack() {
+    if (timer[1] > 0) return;
     if (this.camera && this.camera.isFocus(this)) {
       tvel.add(camera.getVel());
       camera.pos.sub(camera.vel);
@@ -43,7 +43,10 @@ class Unit extends Entity {
 
     timer[0] = 0;
     timer[1] = 10;
-    return false;
+  }
+
+  boolean resolveBlock(Entity entity) {
+    super.resolveBlock(entity);
   }
 
   boolean isDead() {
@@ -87,10 +90,10 @@ class Unit extends Entity {
 
     // Move camera along with Unit if passes EDGE_OFFSET
     if (camera.focus == this) {
-      if (tpos.y <= Camera.EDGE_OFFSET && y < 0 ||
-        tpos.y >= __HEIGHT__ - Camera.EDGE_OFFSET && y > 0 ||
-        tpos.x <= Camera.EDGE_OFFSET && x < 0 ||
-        tpos.x >= __WIDTH__ - Camera.EDGE_OFFSET && x > 0) {
+      if ((tpos.y <= Camera.EDGE_OFFSET && y < 0) ||
+          (tpos.x <= Camera.EDGE_OFFSET && x < 0) ||
+          (tpos.y >= __HEIGHT__ - Camera.EDGE_OFFSET && y > 0) ||
+          (tpos.x >= __WIDTH__ - Camera.EDGE_OFFSET && x > 0)) {
           camera.move(x, y);
           return;
       }

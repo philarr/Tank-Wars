@@ -1,12 +1,14 @@
 //Widget class - the immovable interactable objects in the game
 class Widget extends Entity {
-  String name = WidgetDef.NAME;
+  static String name = "Widget";
   boolean on = false;
   Widget(int x, int y, int w, int h, Camera camera) {
     super(x, y, w, h, camera);
   }
 
-  boolean resolveBlock(Entity entity) {}
+  boolean resolveBlock(Entity entity) {
+    super.resolveBlock(entity);
+  }
   boolean resolveBlock(Entity entity, boolean n) {}
   void draw() {
     // No need to call super.update(), widgets are static

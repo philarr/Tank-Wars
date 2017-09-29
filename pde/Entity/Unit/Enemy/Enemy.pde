@@ -1,6 +1,6 @@
 //Enemy class to describe the basic enemy
 class Enemy extends Unit {
-  String name = EnemyDef.NAME;
+  static String name = "Enemy";
   ArrayList<int[]> pathing = new ArrayList<int[]>(); //Where it will move to
   int currentPath; //Its current path location
   boolean dir; //Which direction (going forward on its path or go back)
@@ -143,6 +143,24 @@ class Enemy extends Unit {
       fill(34, 177, 76);
       if (this.health > 0 ) rect(this.w/-2, -this.h/1.3, this.w*(this.health/this.healthMax), 10);
       popMatrix();
+    }
+  }
+
+
+
+  boolean resolveBlock(Entity entity) {
+    switch (entity.name) {
+      case "Projectile":
+        if (!this.delayResolve()) {
+          entity.displacement(this);
+        }
+        return false;
+      case "Wall":
+      case "Cube":
+        this.bounceBack();
+        return false;
+      default:
+        return false;
     }
   }
 

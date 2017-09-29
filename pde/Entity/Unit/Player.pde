@@ -1,6 +1,6 @@
 //Player class to describe the player (you)
 class Player extends Unit {
-  String name = PlayerDef.NAME;
+  static String name = "Player";
   boolean hitAnimate; //If you are hit, does the fade blinking
   int fade; //Hold the animation number
   int reload; //Reload
@@ -55,9 +55,28 @@ class Player extends Unit {
   }
 
   boolean resolveBlock(Entity entity) {
-    if (entity.owner == this) return false;
-    super.resolveBlock(entity);
-    this.chargeTime = 0;
+    switch(entity.name) {
+      case "Projectile":
+        if (entity.owner != this && !this.delayResolve()) {
+          entity.displacement(this);
+          this.timer[0] = 15;
+        }
+        break;
+      case "Enemy":
+        this.chargeTime = 0;
+      case "Wall":
+      case "Cube":
+        this.bounceBack();
+        this.chargeTime = 0;
+        break;
+      case "Door":
+        if (!entity.open) {
+          this.bounceBack();
+          this.chargeTime = 0;
+        }
+      default:
+        break;
+    }
     return false;
   }
 

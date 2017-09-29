@@ -20,6 +20,140 @@ class Map {
   ArrayList<Entity> playerProjectileList = new ArrayList<Entity>();
   ArrayList<Entity> enemyProjectileList = new ArrayList<Entity>();
 
+
+  static boolean boundingBox(e1, e2) {
+    return (abs(e1.pos.x - e2.pos.x) < e1.w/2 + e2.w/2 &&
+            abs(e1.pos.y - e2.pos.y) < e1.h/2 + e2.h/2);
+  }
+
+  Map(State state) {
+    Object Quadtree = external.get('Quadtree');
+    if (!Quadtree) system.log('Missing tree class.');
+
+    this.container = state;
+    this.camera = state.camera;
+
+    int stage = state.stage;
+    this.level = Level.level[stage];
+    this.pathing = Level.pathing[stage];
+    this.cubes = Level.cubes[stage];
+    this.portal = Level.portal[stage];
+    this.boss = Level.boss[stage];
+
+    this.player = new Player(this.getPlayerStart(), state.camera);
+
+    this.collision = new Quadtree({
+      width: this.level.length * LevelDef.TILE_WIDTH,
+      height: this.level.length * LevelDef.TILE_HEIGHT,
+    });
+  }
+
+  void start() {
+    Map self = this;
+    this.cubeList.addAll(Map.loadCube(self));
+    this.widgetList.addAll(Map.loadWall(self));
+    this.widgetList.addAll(Map.loadWidget(self));
+    this.widgetList.addAll(Map.loadPortal(self));
+    this.enemyList.addAll(Map.loadEnemy(self));
+    if (this.bossExist()) this.enemyList.add(Map.loadBoss(self));
+
+    console.log(this.collision.pretty());
+  }
+
+  void updateEntity(ArrayList<Entity> list) {
+    for (int i = 0; i < list.size(); i++) {
+      Entity entity = list.get(i);
+      Entity[] collided = this.collision.colliding(entity, Map.boundingBox);
+      for (int c = 0; c < collided.length; c++) {
+        if (collided[c].resolveBlock(entity)) {
+          list.remove(collided[c]);
+          this.collision.remove(collided[c]);
+        }
+        if (entity.resolveBlock(collided[c])) {
+          list.remove(entity);
+          this.collision.remove(entity);
+        }
+      }
+      entity.update();
+    }
+  }
+
+  void updateProjectile(ArrayList<Projectile> list) {
+    for (int i = 0; i < list.size(); i++) {
+      Projectile projectile = list.get(i);
+      Entity[] collided = this.collision.colliding(projectile, Map.boundingBox);
+      for (int c = 0; c < collided.length; c++) {
+        if (collided[c].resolveBlock(projectile)) {
+          list.remove(collided[c]);
+          this.collision.remove(collided[c]);
+        }
+        if (projectile.resolveBlock(collided[c], list, this.collision)) {
+          list.remove(projectile);
+          this.collision.remove(projectile);
+        }
+      }
+      projectile.update();
+    }
+  }
+
+  void update() {
+    updateEntity(this.widgetList);
+    updateEntity(this.cubeList);
+    updateEntity(this.enemyList);
+    updateProjectile(this.playerProjectileList);
+    updateProjectile(this.enemyProjectileList);
+
+    Entity[] collided = this.collision.colliding(this.player);
+    for (int c = 0; c < collided.length; c++) {
+      collided[c].resolveBlock(this.player);
+      this.player.resolveBlock(collided[c]);
+    }
+    this.player.update();
+
+
+  }
+
+  void drawEntity(ArrayList<Entity> list) {
+    for (int i = 0; i < list.size(); i++) {
+      Entity e = list.get(i);
+      if (this.camera && this.camera.inScreen(e)) e.draw();
+    }
+  }
+
+  void draw() {
+    drawEntity(this.widgetList);
+    drawEntity(this.cubeList);
+    drawEntity(this.enemyList);
+    drawEntity(this.playerProjectileList);
+    drawEntity(this.enemyProjectileList);
+
+    if (this.camera && this.camera.inScreen(this.player)) {
+      this.player.draw();
+    }
+  }
+
+  PVector getPlayerStart() {
+    PVector startXY = new PVector(0, 0);
+    for (int y = 0; y < this.level.length; y++) {
+      for (int x = 0; x < this.level[y].length; x++) {
+        if (this.level[y][x] == LevelDef.START) {
+          int[] coord = Map.toCoord(x, y);
+          startXY.set(coord[0], coord[1], 0);
+          return startXY;
+        }
+      }
+    }
+    return startXY;
+  }
+
+  boolean bossExist() {
+    return !!this.boss && this.boss.length > 0;
+  }
+
+  void removeEntity() {}
+  void removeProjectile(Entity entity) {}
+
+
   static int[] toCoord(int tileX, int tileY) {
     int[] coord = {
       (tileX * LevelDef.TILE_WIDTH) + LevelDef.TILE_WIDTH/2,
@@ -27,7 +161,6 @@ class Map {
     };
     return coord;
   }
-
 
   static Enemy loadBoss(Map map) {
     Boss b = new Boss(map.boss[0], map.boss[1], state);
@@ -138,138 +271,6 @@ class Map {
     map.collision.pushAll(widget.toArray(), true);
     return widget;
   }
-
-  Map(State state) {
-    Object Quadtree = external.get('Quadtree');
-    if (!Quadtree) system.log('Missing tree class.');
-
-    this.container = state;
-    this.camera = state.camera;
-
-    int stage = state.stage;
-
-    this.level = Level.level[stage];
-    this.pathing = Level.pathing[stage];
-    this.cubes = Level.cubes[stage];
-    this.portal = Level.portal[stage];
-    this.boss = Level.boss[stage];
-
-    this.player = new Player(this.getPlayerStart(), state.camera);
-
-    this.collision = new Quadtree({
-      width: this.level.length * LevelDef.TILE_WIDTH,
-      height: this.level.length * LevelDef.TILE_HEIGHT
-    });
-  }
-
-  void start() {
-    Map self = this;
-    this.cubeList.addAll(Map.loadCube(self));
-    this.widgetList.addAll(Map.loadWall(self));
-    this.widgetList.addAll(Map.loadWidget(self));
-    this.widgetList.addAll(Map.loadPortal(self));
-    this.enemyList.addAll(Map.loadEnemy(self));
-    if (this.bossExist()) this.enemyList.add(Map.loadBoss(self));
-
-    // Order matters for draw z-index
-
-    console.log(this.collision.pretty());
-  }
-
-  void updateEntity(ArrayList<Entity> list) {
-    for (int i = 0; i < list.size(); i++) {
-      Entity entity = list.get(i);
-      Entity[] collided = this.collision.colliding(entity);
-      for (int c = 0; c < collided.length; c++) {
-        if (collided[c].resolveBlock(entity)) {
-          list.remove(collided[c]);
-          this.collision.remove(collided[c]);
-        }
-        if (entity.resolveBlock(collided[c])) {
-          list.remove(entity);
-          this.collision.remove(entity);
-        }
-      }
-      entity.update();
-    }
-  }
-
-  void updateProjectile(ArrayList<Projectile> list) {
-    for (int i = 0; i < list.size(); i++) {
-      Projectile projectile = list.get(i);
-      Entity[] collided = this.collision.colliding(projectile);
-      for (int c = 0; c < collided.length; c++) {
-        if (collided[c].resolveBlock(projectile)) {
-          list.remove(collided[c]);
-          this.collision.remove(collided[c]);
-        }
-        if (projectile.resolveBlock(collided[c], list, this.collision)) {
-          list.remove(projectile);
-          this.collision.remove(projectile);
-        }
-      }
-      projectile.update();
-    }
-  }
-
-  void update() {
-    if (this.container.isPaused()) return;
-
-    updateProjectile(this.playerProjectileList);
-    updateProjectile(this.enemyProjectileList);
-    updateEntity(this.widgetList);
-    updateEntity(this.cubeList);
-    updateEntity(this.enemyList);
-
-    Entity[] collided = this.collision.colliding(this.player);
-
-
-    for (int c = 0; c < collided.length; c++) {
-      collided[c].resolveBlock(this.player);
-      this.player.resolveBlock(collided[c]);
-    }
-    this.player.update();
-  }
-
-  void drawEntity(ArrayList<Entity> list) {
-    for (int i = 0; i < list.size(); i++) {
-      Entity e = list.get(i);
-      if (this.camera && this.camera.inScreen(e)) e.draw();
-    }
-  }
-
-  void draw() {
-    drawEntity(this.widgetList);
-    drawEntity(this.cubeList);
-    drawEntity(this.enemyList);
-    drawEntity(this.playerProjectileList);
-    drawEntity(this.enemyProjectileList);
-
-    if (this.camera && this.camera.inScreen(this.player)) {
-      this.player.draw();
-    }
-  }
-
-  PVector getPlayerStart() {
-    PVector startXY = new PVector(0, 0);
-    for (int y = 0; y < this.level.length; y++) {
-      for (int x = 0; x < this.level[y].length; x++) {
-        if (this.level[y][x] == LevelDef.START) {
-          int[] coord = Map.toCoord(x, y);
-          startXY.set(coord[0], coord[1], 0);
-          return startXY;
-        }
-      }
-    }
-    return startXY;
-  }
-
-  boolean bossExist() {
-    return !!this.boss && this.boss.length > 0;
-  }
-
-  void removeEntity() {}
-  void removeProjectile(Entity entity) {}
 
 }
 

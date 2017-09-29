@@ -1,6 +1,6 @@
 //Trigger that opens door
 class Trigger extends Widget {
-  String name = TriggerDef.NAME;
+  static String name = "Trigger";
   ArrayList<Door> door = new ArrayList<Door>();
   Entity onObj; //the entity that is on it
 
@@ -16,25 +16,26 @@ class Trigger extends Widget {
     popMatrix();
   }
 
+  void update() {
+    this.onObj = false
+  }
+
   boolean resolveBlock(Entity entity) {
     //Player moved onto tile and is not already on it
-
-    if (!this.on) {
-      this.on = true;
-      this.onObj = entity;
-      for (int i = 0; i < this.door.size(); i++) {
-        this.camera.queue(this.door.get(i));
-        this.door.get(i).unlock();
-        narrator.say1(new Dialogue(100, null, "Switch activated!  \n\n<Space> to skip."));
-      }
-    }
-    //Player moves out of tile..
-    if (this.on && entity == onObj) {
-      this.onObj = null;
-      this.on = false;
-      for (int i = 0; i < this.door.size(); i++) {
-        this.door.get(i).lock();
-      }
+    switch (entity.name) {
+      case "Cube":
+        if (!this.on || this.onObj != entity) {
+          this.on = true;
+          this.onObj = entity;
+          for (int i = 0; i < this.door.size(); i++) {
+            this.camera.queue(this.door.get(i));
+            this.door.get(i).unlock();
+            narrator.say1(new Dialogue(100, null, "Switch activated!  \n\n<Space> to skip."));
+          }
+        }
+        break;
+      default:
+        break;
     }
   }
 }

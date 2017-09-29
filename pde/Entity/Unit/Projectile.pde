@@ -1,22 +1,20 @@
 //Projectile class to describe the bullets
 class Projectile extends Unit {
-  String name = ProjectileDef.NAME;
+  static String name = "Projectile";
+  static float SCALAR = 0.03;
   int dmg; //How much damage
   int charge; //How much "charge" this projectiles to determine its size and damage
   int type; //What kind of projectile it is (Push back, pull, enemy color, boss color)
 
   Projectile(int dmg, int charge, int type, Unit owner, PVector mouse, Camera camera) {
-    float size = 10*(0.03*charge);
-    if (size < 10) size = 10;
+    float size = 10 * (Projectile.SCALAR * charge);
+    size = size < 10 ? 10 : size;
     super(owner.pos.x, owner.pos.y, size, size, camera);
-    console.log(size);
-    this.w = size;
-    this.h = size;
     this.dmg = dmg;
     this.charge = charge;
     this.type = type;
     this.moveSpeed = 10;
-    this.owner = owner;
+    this.owner = owner.owner ? owner.owner : owner;
     PVector dir = new PVector();
     mouse.sub(owner.tpos);
     dir.set(mouse);
@@ -24,7 +22,6 @@ class Projectile extends Unit {
     this.tpos.add(dir.x*(15+(owner.w/2)), dir.y*(15+(owner.h)), 0);
     dir.mult(this.moveSpeed);
     this.tvel.set(dir);
-
   }
 
   //Draws different color projectile based on its type
@@ -44,66 +41,47 @@ class Projectile extends Unit {
     popMatrix();
   }
 
-  //Overridden update because it moves differently from regular units
   void update() {
-    this.updateCollision();
-    if (this.camera && camera.isFocus(this)) {
-      this.pos.set(PVector.add(this.tpos, camera.pos));
-      this.vel.set(PVector.add(this.tvel, camera.vel));
-    }
-    else {
-      this.pos.set(this.tpos);
-      this.vel.set(this.tvel);
-    }
+    super.update();
     tpos.add(tvel);
   }
 
   //Shoots more projectile from this projectile at preset locations
   ArrayList<Projectile> makeExplosion() {
     if (this.type == 4) this.type = 2;
-    ArrayList<Projectile> list = new ArrayList<Projectile>();
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x + 1, this.tpos.y), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x - 1, this.tpos.y), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x, this.tpos.y + 1), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x, this.tpos.y - 1), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x + 1, this.tpos.y + 1), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x - 1, this.tpos.y - 1), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x + 1, this.tpos.y - 1), camera));
-    list.add(new Projectile(this.dmg/4, 1, this.type, this.owner, new PVector(this.tpos.x - 1, this.tpos.y + 1), camera));
-    return list;
+    Projectile[] explosion = {
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x + 1, this.tpos.y), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x - 1, this.tpos.y), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x, this.tpos.y + 1), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x, this.tpos.y - 1), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x + 1, this.tpos.y + 1), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x - 1, this.tpos.y - 1), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x + 1, this.tpos.y - 1), camera),
+      new Projectile(this.dmg/4, 1, this.type, this, new PVector(this.tpos.x - 1, this.tpos.y + 1), camera)
+    };
+    return explosion;
   }
-
-
 
   boolean resolveBlock(Entity entity, list, collision) {
-    console.log(entity.name);
-    if (this.owner == entity || entity == this) return false;
-    console.log('projectile block', entity);
-    if (0.06*charge == 6) {
-      ArrayList<Projectile> toAdd = this.makeExplosion();
-      list.addAll(toAdd);
-      collision.pushAll(toAdd.toArray(), true);
+    switch (entity.name) {
+      case "Projectile": return false;
+      default:
+        if (0.06 * charge == 6) {
+          ArrayList<Projectile> toAdd = this.makeExplosion();
+          list.addAll(toAdd);
+          collision.pushAll(toAdd, true);
+        }
+        return true;
     }
-    if (entity.isHit) {
-      entity.isHit(this.dmg);
-    }
-    return true;
   }
 
-  //Projectile hits the Unit
-  void resolveCollision(Unit obj, ArrayList list) {
-
-    float multcharge = 0.06*charge;
-
-    if (multcharge < 1) multcharge = 1;
+  void displacement(Entity entity) {
+    float multiplier = 0.06 * charge;
+    multiplier = multiplier < 1 ? 1 : multiplier;
+    if (multiplier == 6) this.dmg *= 2;
     this.tvel.normalize();
-    this.tvel.mult(multcharge);
+    this.tvel.mult(multiplier);
     if (this.type == 1) this.tvel.mult(-1);
-    if (multcharge == 6) this.dmg *= 2;
-    obj.isHit((Unit)this, this.dmg);
-
-    if (multcharge == 6) makeExplosion(list);
-
-    list.remove(this);
+    entity.move(this.tvel.x * 3, this.tvel.y * 3);
   }
 }

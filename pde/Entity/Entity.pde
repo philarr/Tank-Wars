@@ -1,5 +1,5 @@
 class Entity {
-  String name = EntityDef.NAME;
+  static String name = "Entity";
   int x, y;
   PVector pos, tpos; //pos - used as a TRUE position, tpos used as temporary position in case current entity is the camera's focus
   float w, h; //Unit width/height size for collision checks
@@ -72,7 +72,14 @@ class Entity {
   //Declared so camera can call this on any Entity
   void move(float x, float y) {}
   void draw() {}
+
   Boolean resolveBlock(Entity entity) {
     return false;
+  }
+
+  boolean delayResolve() {
+    return (this.timer[0] > 0 ||
+            this.timer[1] > 0 ||
+            this.timer[2] > 0);
   }
 }

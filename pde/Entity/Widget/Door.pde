@@ -1,6 +1,6 @@
 //Door that changes wall to moveable tile
 class Door extends Widget {
-  String name = DoorDef.NAME;
+  static String name = "Door";
   boolean open;
   int timer;
   Trigger t;
@@ -64,16 +64,22 @@ class Door extends Widget {
   }
 
   boolean resolveBlock(Entity entity) {
-    //Player moved onto tile and is not already on it
-    if (!this.on) {
-      this.on = true;
-      if (!this.open && narrator) {
-        narrator.say1(new Dialogue(100, null, "This door is locked..."));
-      }
-    }
-    //Player moves out of tile..
-    if (this.on) {
-      this.on = false;
+    switch (entity.name) {
+      case "Player":
+        //Player moved onto tile and is not already on it
+        if (!this.on) {
+          this.on = true;
+          if (!this.open && narrator) {
+            narrator.say1(new Dialogue(100, null, "This door is locked..."));
+          }
+        }
+        //Player moves out of tile..
+        if (this.on) {
+          this.on = false;
+        }
+        break;
+      default:
+        break;
     }
     return false;
   }
