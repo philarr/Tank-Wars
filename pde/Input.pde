@@ -50,7 +50,6 @@ class Input {
     else if (Input.isRight()) STATE_RIGHT = true;
     else if (Input.isR()) STATE_R = true;
     else if (Input.isEnter()) STATE_ENTER = true;
-    console.log(key)
   }
 
   void keyUp() {

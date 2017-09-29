@@ -88,6 +88,14 @@ class Camera {
     return entity == this.focus;
   }
 
+  boolean inScreen(Entity entity) {
+    return ((entity.tpos.x - entity.w/2) - this.pos.x < width
+    && (entity.tpos.x + entity.w/2) - this.pos.x > 0
+    && (entity.tpos.y - entity.h/2) - this.pos.y < height
+    && (entity.tpos.y + entity.h/2) - this.pos.y > 0
+    || this.isFocus(entity));
+  }
+
   void update() {
     // If no pan item is queued, focus on player
     if (!this.panning & this.queueItem.size() <= 0 && this.focus != this.player) {

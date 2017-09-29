@@ -4,6 +4,7 @@
 */
 class Map {
   State container;
+  Player player;
   Camera camera;
   int [][] level;
   int [][][] pathing;
@@ -12,11 +13,20 @@ class Map {
   int [] boss;
   Quadtree collision;
 
-  ArrayList<Widget> widgetList = new ArrayList<Widget>();
-  ArrayList<Cube> cubeList = new ArrayList<Cube>();
-  ArrayList<Enemy> enemyList = new ArrayList<Enemy>();
-  ArrayList<Projectile> playerProjectileList = new ArrayList<Projectile>();
-  ArrayList<Projectile> enemyProjectileList = new ArrayList<Projectile>();
+  Player player;
+  ArrayList<Entity> widgetList = new ArrayList<Entity>();
+  ArrayList<Entity> cubeList = new ArrayList<Entity>();
+  ArrayList<Entity> enemyList = new ArrayList<Entity>();
+  ArrayList<Entity> playerProjectileList = new ArrayList<Entity>();
+  ArrayList<Entity> enemyProjectileList = new ArrayList<Entity>();
+
+  static int[] toCoord(int tileX, int tileY) {
+    int[] coord = {
+      (tileX * LevelDef.TILE_WIDTH) + LevelDef.TILE_WIDTH/2,
+      (tileY * LevelDef.TILE_HEIGHT) + LevelDef.TILE_HEIGHT/2
+    };
+    return coord;
+  }
 
 
   static Enemy loadBoss(Map map) {
@@ -25,19 +35,18 @@ class Map {
     return b;
   }
 
-  static ArrayList<Entity> loadWall(Map map) {
-    ArrayList<Entity> wall = new ArrayList<Entity>();
+  static ArrayList<Wall> loadWall(Map map) {
+    ArrayList<Wall> wall = new ArrayList<Wall>();
     for (int y = 0; y < map.level.length; y++) {
       for (int x = 0; x < map.level[y].length; x++) {
         if (map.level[y][x] == 1) {
-          int pX = (x * LevelDef.TILE_WIDTH) + LevelDef.TILE_WIDTH/2;
-          int pY = (y * LevelDef.TILE_HEIGHT) + LevelDef.TILE_HEIGHT/2;
-          Entity w = new Entity(pX, pY, LevelDef.TILE_WIDTH, LevelDef.TILE_HEIGHT)
-          map.collision.push(w, true);
+          int[] coord = Map.toCoord(x, y);
+          Wall w = new Wall(coord[0], coord[1], map.camera, null);
           wall.add(w);
         }
       }
     }
+    map.collision.pushAll(wall.toArray(), true);
     return wall;
   }
 
@@ -45,10 +54,11 @@ class Map {
     ArrayList<Portal> portal = new ArrayList<Portal>();
     if (!map.portal || map.portal.length == 0) return portal;
     for (int i = 0; i < map.portal.length; i++) {
-      Portal p = new Portal(map.portal[i][0], map.portal[i][1], map.camera, map.container);
-      map.collision.push(p, true);
+      int[] coord = Map.toCoord(map.portal[i][0], map.portal[i][1]);
+      Portal p = new Portal(coord[0], coord[1], map.camera, map.container);
       portal.add(p);
     }
+    map.collision.pushAll(portal.toArray(), true);
     return portal;
   }
 
@@ -56,10 +66,11 @@ class Map {
     ArrayList<Cube> cube = new ArrayList<Cube>();
     if (!map.cubes || map.cubes.length == 0) return cube;
     for (int i = 0; i < map.cubes.length; i++) {
-      Cube c = new Cube(map.cubes[i][0], map.cubes[i][1], map.camera)
-      map.collision.push(c, true);
+      int[] coord = Map.toCoord(map.cubes[i][0], map.cubes[i][1]);
+      Cube c = new Cube(coord[0], coord[1], map.camera)
       cube.add(c);
     }
+    map.collision.pushAll(cube.toArray(), true);
     return cube;
   }
 
@@ -75,10 +86,11 @@ class Map {
       for (int u = 0; u < enemies[i].length; u++) {
         path.add(enemies[i][u]);
       }
-      Enemy e = new Enemy(startX, startY, map.camera, path, map.player);
-      map.collision.push(e, true);
+      int[] coord = Map.toCoord(startX, startY);
+      Enemy e = new Enemy(coord[0], coord[1], map.camera, path, map.player);
       enemy.add(e);
     }
+    map.collision.pushAll(enemy.toArray(), true);
     return enemy;
   }
 
@@ -100,8 +112,8 @@ class Map {
             }
           }
           if (doorSearch == map.level[y][x] && doorSearch != 0) {
-            Door d = new Door(x, y, Door.direction(x, y, map.level));
-            map.collision.push(d, true);
+            int[] coord = Map.toCoord(x, y);
+            Door d = new Door(coord[0], coord[1], map.camera, Door.direction(x, y, map.level));
             doors.add(d);
             addCount += 1;
           }
@@ -112,8 +124,8 @@ class Map {
         for (int y = 0; y < map.level.length; y++) {
           for (int x = 0; x < map.level[y].length; x++) {
             if (map.level[y][x] == triggerId) {
-              Trigger t = new Trigger(x, y, map.camera, doors)
-              map.collision.push(t, true);
+              int[] coord = Map.toCoord(x, y);
+              Trigger t = new Trigger(coord[0], coord[1], map.camera, doors)
               widget.add(t);
             }
           }
@@ -123,6 +135,7 @@ class Map {
       widget.addAll(doors);
       doors.clear();
     }
+    map.collision.pushAll(widget.toArray(), true);
     return widget;
   }
 
@@ -132,7 +145,6 @@ class Map {
 
     this.container = state;
     this.camera = state.camera;
-    this.player = state.player;
 
     int stage = state.stage;
 
@@ -142,6 +154,8 @@ class Map {
     this.portal = Level.portal[stage];
     this.boss = Level.boss[stage];
 
+    this.player = new Player(this.getPlayerStart(), state.camera);
+
     this.collision = new Quadtree({
       width: this.level.length * LevelDef.TILE_WIDTH,
       height: this.level.length * LevelDef.TILE_HEIGHT
@@ -150,19 +164,90 @@ class Map {
 
   void start() {
     Map self = this;
-    this.loadWall(self);
     this.cubeList.addAll(Map.loadCube(self));
+    this.widgetList.addAll(Map.loadWall(self));
     this.widgetList.addAll(Map.loadWidget(self));
     this.widgetList.addAll(Map.loadPortal(self));
     this.enemyList.addAll(Map.loadEnemy(self));
     if (this.bossExist()) this.enemyList.add(Map.loadBoss(self));
 
+    // Order matters for draw z-index
+
     console.log(this.collision.pretty());
   }
 
+  void updateEntity(ArrayList<Entity> list) {
+    for (int i = 0; i < list.size(); i++) {
+      Entity entity = list.get(i);
+      Entity[] collided = this.collision.colliding(entity);
+      for (int c = 0; c < collided.length; c++) {
+        if (collided[c].resolveBlock(entity)) {
+          list.remove(collided[c]);
+          this.collision.remove(collided[c]);
+        }
+        if (entity.resolveBlock(collided[c])) {
+          list.remove(entity);
+          this.collision.remove(entity);
+        }
+      }
+      entity.update();
+    }
+  }
 
-  int[][] getCollision() {
-    return this.level;
+  void updateProjectile(ArrayList<Projectile> list) {
+    for (int i = 0; i < list.size(); i++) {
+      Projectile projectile = list.get(i);
+      Entity[] collided = this.collision.colliding(projectile);
+      for (int c = 0; c < collided.length; c++) {
+        if (collided[c].resolveBlock(projectile)) {
+          list.remove(collided[c]);
+          this.collision.remove(collided[c]);
+        }
+        if (projectile.resolveBlock(collided[c], list, this.collision)) {
+          list.remove(projectile);
+          this.collision.remove(projectile);
+        }
+      }
+      projectile.update();
+    }
+  }
+
+  void update() {
+    if (this.container.isPaused()) return;
+
+    updateProjectile(this.playerProjectileList);
+    updateProjectile(this.enemyProjectileList);
+    updateEntity(this.widgetList);
+    updateEntity(this.cubeList);
+    updateEntity(this.enemyList);
+
+    Entity[] collided = this.collision.colliding(this.player);
+
+
+    for (int c = 0; c < collided.length; c++) {
+      collided[c].resolveBlock(this.player);
+      this.player.resolveBlock(collided[c]);
+    }
+    this.player.update();
+  }
+
+  void drawEntity(ArrayList<Entity> list) {
+    for (int i = 0; i < list.size(); i++) {
+      Entity e = list.get(i);
+      if (this.camera && this.camera.inScreen(e)) e.draw();
+    }
+  }
+
+  void draw() {
+    drawEntity(this.widgetList);
+    drawEntity(this.cubeList);
+    drawEntity(this.enemyList);
+    drawEntity(this.playerProjectileList);
+    drawEntity(this.enemyProjectileList);
+
+    if (this.camera && this.camera.inScreen(this.player)) {
+      this.player.draw();
+    }
   }
 
   PVector getPlayerStart() {
@@ -170,7 +255,8 @@ class Map {
     for (int y = 0; y < this.level.length; y++) {
       for (int x = 0; x < this.level[y].length; x++) {
         if (this.level[y][x] == LevelDef.START) {
-          startXY.set(x, y, 0);
+          int[] coord = Map.toCoord(x, y);
+          startXY.set(coord[0], coord[1], 0);
           return startXY;
         }
       }
@@ -182,63 +268,8 @@ class Map {
     return !!this.boss && this.boss.length > 0;
   }
 
-  void drawWall(int x, int y) {
-    pushMatrix();
-    translate(x, y);
-    fill(255, 53, 62);
-    noStroke();
-    image(asset.get(WallDef.ASSET_BASE), 0, 0);
-    popMatrix();
-  }
+  void removeEntity() {}
+  void removeProjectile(Entity entity) {}
 
-  void drawShadow(int x, int y, int w, int h) {
-    pushMatrix();
-    translate(x, y);
-    fill(0, 0, 0, 127);
-    noStroke();
-    rect(0, 0, w, h);
-    popMatrix();
-  }
-
-  void update() {
-  }
-
-  void draw() {
-    int xPos, yPos, cX, cY, oX, oY;
-    cX = abs(floor(this.camera.pos.x / LevelDef.TILE_WIDTH));
-    cY = abs(floor(this.camera.pos.y / LevelDef.TILE_HEIGHT));
-    oX = abs(ceil((this.camera.pos.x + __WIDTH__) / LevelDef.TILE_WIDTH));
-    oY = abs(ceil((this.camera.pos.y + __HEIGHT__) / LevelDef.TILE_HEIGHT));
-    if (this.camera.pos.x < 0) cX = 0;
-    if (this.camera.pos.y < 0) cY = 0;
-    if (cY+oY > this.level.length) oY = this.level.length;
-    if (cX+oX > this.level[0].length) oX = this.level[0].length;
-
-    yPos = cY * LevelDef.TILE_HEIGHT;
-    for (int i = cY; i < oY; i++) {
-      xPos = cX * LevelDef.TILE_WIDTH;
-      for (int u = cX; u < oX; u++) {
-        int drawX = xPos - this.camera.pos.x;
-        int drawY = yPos - this.camera.pos.y;
-
-        if (this.level[i][u] == 1) {
-          this.drawWall(drawX, drawY);
-        }
-        if (this.level[i][u] > 0) {
-          if (this.level[i][u+1] <= 0) {
-            drawShadow(drawX + LevelDef.TILE_WIDTH, drawY, 10, LevelDef.TILE_HEIGHT);
-            if (this.level[i+1][u+1] <= 0 && this.level[i+1][u] <= 0 ) {
-              drawShadow(drawX + LevelDef.TILE_WIDTH, drawY + LevelDef.TILE_HEIGHT, 10, 10);
-            }
-          }
-          if (this.level[i+1][u] <= 0) {
-            drawShadow(drawX, drawY + LevelDef.TILE_HEIGHT, LevelDef.TILE_WIDTH, 10);
-          }
-        }
-        xPos += LevelDef.TILE_WIDTH;
-      }
-      yPos += LevelDef.TILE_HEIGHT;
-    }
-  }
 }
 

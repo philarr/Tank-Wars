@@ -1,5 +1,6 @@
 //Player class to describe the player (you)
 class Player extends Unit {
+  String name = PlayerDef.NAME;
   boolean hitAnimate; //If you are hit, does the fade blinking
   int fade; //Hold the animation number
   int reload; //Reload
@@ -24,7 +25,7 @@ class Player extends Unit {
     if (chargeTime < 100) chargeTime += 2;
   }
 
-  void isHit(Unit obj, int damage) {
+  void isHit(int damage) {
     if (timer[4] > 0) return;
     this.health -= damage;
     if (this.health <= 0 && timer[5] == 0 && !dead) timer[5] = 100;
@@ -39,13 +40,34 @@ class Player extends Unit {
     return this.dead;
   }
 
+  void update() {
+    super.update();
+    tvel.add(tacc);
+    tvel.mult(UnitDef.FRICTION);
+    tpos.add(tvel);
+    tacc.set(0, 0, 0);
+
+    //Shake timer
+    if (timer[5] > 0) {
+      if ( timer[5] % 4 == 1 || timer[5] % 4 == 2) this.tpos.add(5, 5, 0);
+      else this.tpos.sub(5, 5, 0);
+    }
+  }
+
+  boolean resolveBlock(Entity entity) {
+    if (entity.owner == this) return false;
+    super.resolveBlock(entity);
+    this.chargeTime = 0;
+    return false;
+  }
+
   void drawBase() {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
     if (up) rotate(radians(0));
     if (down) rotate(radians(180));
-    if (left) rotate(radians(-90));
-    if (right) rotate(radians(90));
+    if (left) rotate(radians(90));
+    if (right) rotate(radians(-90));
     image(ASSET_BASE, -25, -35);
     popMatrix();
   }

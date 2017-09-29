@@ -1,5 +1,6 @@
 //Enemy class to describe the basic enemy
 class Enemy extends Unit {
+  String name = EnemyDef.NAME;
   ArrayList<int[]> pathing = new ArrayList<int[]>(); //Where it will move to
   int currentPath; //Its current path location
   boolean dir; //Which direction (going forward on its path or go back)
@@ -13,7 +14,7 @@ class Enemy extends Unit {
   boolean targetPlayer; //If it is currently targeting the player within its aggro radius
   Player player; //Reference variable to the player
 
-  Enemy(float x, float y, int w, int h, Camera camera, ArrayList pathing, Player player) {
+  Enemy(int x, int y, int w, int h, Camera camera, ArrayList pathing, Player player) {
     super(x, y, w, h, camera);
     if (pathing != null) {
       this.pathing = pathing;
@@ -64,6 +65,18 @@ class Enemy extends Unit {
 
     else {
       super.update();
+
+      tvel.add(tacc);
+      tvel.mult(UnitDef.FRICTION);
+      tpos.add(tvel);
+      tacc.set(0, 0, 0);
+
+      //Shake timer
+      if (timer[5] > 0) {
+        if ( timer[5] % 4 == 1 || timer[5] % 4 == 2) this.tpos.add(5, 5, 0);
+        else this.tpos.sub(5, 5, 0);
+      }
+
       if (moveAmount > 0) {
         move(-toMove.x/2, -toMove.y/2);
         moveAmount -= 1;

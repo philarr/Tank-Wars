@@ -1,9 +1,10 @@
 //The portal to move onto the next state
 class Portal extends Widget {
   State state;
+  String name = PortalDef.NAME;
 
   Portal(float x, float y, Camera camera, State state) {
-    super(x, y, 50, 50, camera);
+    super(x, y, PortalDef.WIDTH, PortalDef.HEIGHT, camera);
     this.state = state;
   }
 
@@ -11,7 +12,7 @@ class Portal extends Widget {
     pushMatrix();
     translate2(this.tpos.x, this.tpos.y);
     fill(50, 100, 190);
-    rect(-25, -25, 50, 50);
+    rect(-PortalDef.WIDTH/2, -PortalDef.HEIGHT/2, PortalDef.WIDTH, PortalDef.HEIGHT);
     popMatrix();
   }
 

@@ -1,9 +1,10 @@
 //Trigger that opens door
 class Trigger extends Widget {
+  String name = TriggerDef.NAME;
   ArrayList<Door> door = new ArrayList<Door>();
   Entity onObj; //the entity that is on it
 
-  Trigger(float x, float y, Camera camera, ArrayList doors) {
+  Trigger(int x, int y, Camera camera, ArrayList doors) {
     super(x, y, TriggerDef.WIDTH, TriggerDef.HEIGHT, camera);
     this.door.addAll(doors);
   }
@@ -15,10 +16,10 @@ class Trigger extends Widget {
     popMatrix();
   }
 
-  void resolveCollision(boolean n, Entity entity) {
+  boolean resolveBlock(Entity entity) {
     //Player moved onto tile and is not already on it
 
-    if (n && !this.on) {
+    if (!this.on) {
       this.on = true;
       this.onObj = entity;
       for (int i = 0; i < this.door.size(); i++) {
@@ -28,7 +29,7 @@ class Trigger extends Widget {
       }
     }
     //Player moves out of tile..
-    if (!n && this.on && entity == onObj) {
+    if (this.on && entity == onObj) {
       this.onObj = null;
       this.on = false;
       for (int i = 0; i < this.door.size(); i++) {

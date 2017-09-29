@@ -1,5 +1,6 @@
 //Door that changes wall to moveable tile
 class Door extends Widget {
+  String name = DoorDef.NAME;
   boolean open;
   int timer;
   Trigger t;
@@ -14,10 +15,12 @@ class Door extends Widget {
     if (level[y-1][x] == 1) return DoorDef.SLIDE_UP;
   }
 
-  Door(float x, float y, Camera camera) {
+  Door(int x, int y, Camera camera, int direction) {
     super(x, y, DoorDef.WIDTH, DoorDef.HEIGHT, camera);
     this.timer = 0;
+    this.direction = direction;
     this.open = false;
+    this.on = false;
     ASSET_BASE = asset.get(DoorDef.ASSET_BASE);
   }
 
@@ -27,7 +30,6 @@ class Door extends Widget {
   }
 
   void animateDoorOpen() {
-    if (this.timer == 0) return;
     switch(this.direction) {
       case DoorDef.SLIDE_UP:
         translate2(this.tpos.x, this.tpos.y - this.timer);
@@ -36,10 +38,10 @@ class Door extends Widget {
         translate2(this.tpos.x, this.tpos.y + this.timer);
         break;
       case DoorDef.SLIDE_LEFT:
-        translate2(this.tpos.x - this.timer, this.tpos.y);
+        translate2(this.tpos.x + this.timer, this.tpos.y);
         break;
       case DoorDef.SLIDE_RIGHT:
-        translate2(this.tpos.x + this.timer, this.tpos.y);
+        translate2(this.tpos.x - this.timer, this.tpos.y);
         break;
       default:
         break;
@@ -61,17 +63,18 @@ class Door extends Widget {
     // this.level[tileY][tileX] = 2;
   }
 
-  void resolveCollision(boolean n) {
+  boolean resolveBlock(Entity entity) {
     //Player moved onto tile and is not already on it
-    if (n && !this.on) {
+    if (!this.on) {
       this.on = true;
       if (!this.open && narrator) {
         narrator.say1(new Dialogue(100, null, "This door is locked..."));
       }
     }
     //Player moves out of tile..
-    if (!n && this.on) {
+    if (this.on) {
       this.on = false;
     }
+    return false;
   }
 }

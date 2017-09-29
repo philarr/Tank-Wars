@@ -3,8 +3,6 @@
 class Asset {
   final static String imgFolder = "Asset/";
   final static String tileFolder = "Asset/Tile/";
-  final static int tileW = 50;
-  final static int tileH = 50;
   HashMap<String, PImage> images = new HashMap<String, PImage>();
 
   Asset() {

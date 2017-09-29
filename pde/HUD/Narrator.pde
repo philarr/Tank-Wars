@@ -8,8 +8,8 @@ class Narrator extends HUD {
     this.camera = !!camera ? camera : null;
   }
 
-  void setCamera(Entity entity) {
-    this.camera = entity.camera;
+  void setCamera(Camera camera) {
+    this.camera = camera;
   }
 
   boolean interceptEnter() {
