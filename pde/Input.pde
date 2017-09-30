@@ -9,6 +9,14 @@ class Input {
   Boolean STATE_R = false;
   Boolean STATE_P = false;
 
+  static void setNetwork(Network network) {
+    Input.network = network;
+  }
+
+  static void disableNetwork() {
+    Input.network = null;
+  }
+
   static Boolean isEsc() {
     return key == 27 || keyCode == ESC;
   }

@@ -35,6 +35,12 @@ class Network {
     return this.connected;
   }
 
+  void send(String event, Object msg) {
+    if (!this.connected) return;
+    console.log(this.socket);
+    this.socket.emit(event, msg);
+  }
+
   void initEventHandlers(Object socket) {
     self = this;
 
@@ -57,17 +63,17 @@ class Network {
 
   void start() {
     if (this.isStarted) return;
-    this.socket = external.get('socket');
+    Socket socket = external.get('socket');
 
-    if (!this.socket) {
+    if (!socket) {
       this.log('Missing external socket library!');
       return;
     }
     this.isStarted = true;
-    Object socket = this.socket(serverUrl, {
+    this.socket = socket(serverUrl, {
       transports: ['websocket']
     });
 
-    this.initEventHandlers(socket);
+    this.initEventHandlers(this.socket);
   }
 }

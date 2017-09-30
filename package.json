@@ -18,6 +18,10 @@
   },
   "homepage": "https://github.com/pmchung/tank-wars#readme",
   "dependencies": {
+    "canvas": "^1.6.7",
+    "jsdom": "^11.2.0",
+    "processing": "git@github.com:sudsy/node-processing.git",
+    "processing-js": "^1.6.6",
     "quadtree-lib": "^1.0.9",
     "socket.io": "^2.0.3"
   }

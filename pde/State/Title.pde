@@ -24,6 +24,7 @@ class Title extends State {
         break;
       case 1: // Online mode
         network.start();
+        Input.setNetwork(network);
         break;
       case 2: // Instructions
         ArrayList<Dialogue> about = new ArrayList<Dialogue>();
